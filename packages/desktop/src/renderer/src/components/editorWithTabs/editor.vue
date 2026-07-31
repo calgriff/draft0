@@ -282,6 +282,19 @@ const { isFountainTab } = useFountainTab()
 // the WYSIWYG engine must be hidden and its commands blocked for it too.
 const inSourceView = computed(() => sourceCode.value || isFountainTab.value)
 
+// muya mounts its floating tools on `document.body`, so they are outside the
+// hidden editor's subtree and survive its `pointer-events: none`. Flag the
+// state on the body so those tools can be hidden wholesale while the source
+// editor is the one on screen — otherwise the markdown block handles appear
+// alongside screenplay text, offering blocks that do not exist in Fountain.
+watch(
+  inSourceView,
+  (value) => {
+    document.body.classList.toggle('source-view', value)
+  },
+  { immediate: true }
+)
+
 // Component state
 const defaultFontFamily = DEFAULT_EDITOR_FONT_FAMILY
 const resolveEditorFont = (family: string): string =>

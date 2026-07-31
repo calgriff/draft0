@@ -343,6 +343,21 @@
       }
     }
   },
+  "fountain": {
+    "blockMenu": {
+      "title": "Screenplay elements",
+      "sceneHeading": "Scene Heading",
+      "action": "Action",
+      "character": "Character",
+      "dialogue": "Dialogue",
+      "parenthetical": "Parenthetical",
+      "transition": "Transition",
+      "section": "Section",
+      "synopsis": "Synopsis",
+      "note": "Note",
+      "pageBreak": "Page Break"
+    }
+  },
   "imageCrop": {
     "title": "Crop Image",
     "hint": "Drag across the image to choose the area to keep.",

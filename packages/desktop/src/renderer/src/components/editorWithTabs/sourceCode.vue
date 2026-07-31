@@ -4,7 +4,12 @@
     class="source-code"
     :class="{ screenplay: isFountainTab }"
     :style="isFountainTab ? screenplayTypography : undefined"
-  />
+  >
+    <fountain-block-menu
+      :editor="editor"
+      :enabled="isFountainTab"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -19,6 +24,7 @@ import { adjustCursor } from '../../util'
 import bus from '../../bus'
 import { oneDarkThemes, railscastsThemes, DEFAULT_EDITOR_FONT_FAMILY } from '@/config'
 import { useFountainTab } from '@/composables/useFountainTab'
+import FountainBlockMenu from './fountainBlockMenu.vue'
 
 // CodeMirror 5 ships no first-party types; the wrapper in src/renderer/src/
 // codeMirror/index.ts also keeps the surface intentionally loose.
@@ -66,9 +72,11 @@ const screenplayTypography = computed(() => ({
 const currentMode = (): string => (isFountainTab.value ? 'fountain' : 'markdown-math')
 
 // The source view is reused across tabs, so the mode has to follow the file.
-watch(isFountainTab, () => {
+watch(isFountainTab, (value) => {
   if (editor.value) {
     editor.value.setOption('mode', currentMode())
+    // A screenplay reads as a page, not as code, so it drops the gutter.
+    editor.value.setOption('lineNumbers', !value)
   }
 })
 
@@ -361,7 +369,7 @@ onMounted(() => {
   const container = sourceCodeContainer.value
   const codeMirrorConfig: Record<string, unknown> = {
     value: markdown,
-    lineNumbers: true,
+    lineNumbers: !isFountainTab.value,
     autofocus: true,
     lineWrapping: true,
     // The full-width band CodeMirror paints behind the cursor's line is more
@@ -443,6 +451,7 @@ onBeforeUnmount(() => {
 
 <style>
 .source-code {
+  position: relative;
   height: calc(100vh - var(--titleBarHeight));
   box-sizing: border-box;
   overflow: auto;

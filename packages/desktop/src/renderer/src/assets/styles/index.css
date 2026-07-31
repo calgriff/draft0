@@ -143,6 +143,15 @@
   --notificationErrorBg: #ff6969;
 }
 
+/* muya's floating tools live on `document.body`, so hiding the editor does not
+   hide them. While the source editor is on screen they belong to a document
+   the user cannot see — and in a screenplay they would offer markdown blocks. */
+body.source-view .mu-float-wrapper,
+body.source-view .mu-front-menu,
+body.source-view .mu-quick-insert-menu {
+  display: none !important;
+}
+
 ::-webkit-scrollbar,
 ::-webkit-scrollbar-corner {
   background: var(--floatHoverColor);
