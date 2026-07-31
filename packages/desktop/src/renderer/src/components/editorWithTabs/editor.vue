@@ -132,7 +132,6 @@ import { SpellcheckerLanguageCommand } from '@/commands'
 import { SpellChecker } from '@/spellchecker'
 import { isOsx, animatedScrollTo } from '@/util'
 import { moveImageToFolder, uploadImage, writeCroppedImage } from '@/util/fileSystem'
-import { resolveLocalImageSrc } from '@/util/resolveImageSrc'
 import { exportScreenplayHTML } from '@/util/exportScreenplay'
 import { guessClipboardFilePath } from '@/util/clipboard'
 import {
@@ -1040,30 +1039,60 @@ const CROP_MIME_BY_EXT: Record<string, string> = {
  * The first crop writes a sibling `<name>.crop.<ext>` and the document points
  * at that; cropping again overwrites that file. Because the path then doesn't
  * change, a `?v=` counter is appended so the renderer refetches instead of
- * showing the pre-crop image from cache — `resolveLocalImageSrc` and the file
+ * showing the pre-crop image from cache — the image loader and the file
  * loader both ignore the query.
  */
 const imageCropAction = async (src: string): Promise<string | null> => {
-  if (!currentFile.value) return null
-  const { pathname: currentPathname } = currentFile.value
+  const warn = (message: string) => {
+    notice.notify({ title: t('imageCrop.title'), type: 'warning', message })
+  }
 
   const [rawPath, query] = src.split(/\?(.*)/s)
+  const currentPathname = currentFile.value?.pathname ?? ''
   const baseDir = currentPathname ? window.path.dirname(currentPathname) : window.DIRNAME
-  if (!baseDir) return null
-  const sourcePath = window.path.isAbsolute(rawPath)
-    ? rawPath
-    : window.path.resolve(baseDir, rawPath)
+  const isAbsolute = window.path.isAbsolute(rawPath)
+
+  // Only a relative path needs a directory to resolve against; an absolute one
+  // is croppable even in a document that has never been saved.
+  if (!isAbsolute && !baseDir) {
+    warn(t('imageCrop.saveFirst'))
+    return null
+  }
+
+  const sourcePath = isAbsolute ? rawPath : window.path.resolve(baseDir!, rawPath)
+  if (!(await window.fileUtils.pathExists(sourcePath))) {
+    warn(t('imageCrop.notFound'))
+    return null
+  }
 
   const ext = window.path.extname(sourcePath).toLowerCase()
   const mime = CROP_MIME_BY_EXT[ext] ?? 'image/png'
 
-  const blob = await new Promise<Blob | null>((resolve) => {
-    bus.emit('showImageCropDialog', {
-      displaySrc: resolveLocalImageSrc(rawPath),
-      mime,
-      resolve
+  // Hand the dialog the bytes as a blob URL rather than a `file://` src: a
+  // file:// image is cross-origin to the renderer, which taints the canvas the
+  // crop draws into and makes its `toBlob()` throw. A blob URL is same-origin.
+  let objectUrl = ''
+  try {
+    const bytes = await window.fileUtils.readFile(sourcePath)
+    const data = bytes instanceof Uint8Array ? bytes : new TextEncoder().encode(String(bytes))
+    // TS lib types `Uint8Array<ArrayBufferLike>`, which does not satisfy
+    // BlobPart's stricter ArrayBuffer expectation; the runtime value is a plain
+    // Uint8Array. Same cast as `getHash` in util/fileSystem.ts.
+    objectUrl = URL.createObjectURL(new Blob([data as unknown as ArrayBuffer], { type: mime }))
+  } catch (err) {
+    log.error('Failed to read image for cropping:', err)
+    warn(t('imageCrop.notFound'))
+    return null
+  }
+
+  let blob: Blob | null = null
+  try {
+    blob = await new Promise<Blob | null>((resolve) => {
+      bus.emit('showImageCropDialog', { displaySrc: objectUrl, mime, resolve })
     })
-  })
+  } finally {
+    URL.revokeObjectURL(objectUrl)
+  }
   if (!blob) return null
 
   try {

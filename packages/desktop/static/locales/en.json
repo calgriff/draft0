@@ -363,6 +363,8 @@
   "imageCrop": {
     "title": "Crop Image",
     "hint": "Drag across the image to choose the area to keep.",
+    "saveFirst": "Save the document first so the image path can be resolved.",
+    "notFound": "That image could not be read from disk.",
     "reset": "Reset",
     "cancel": "Cancel",
     "crop": "Crop"
