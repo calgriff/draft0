@@ -354,7 +354,10 @@ onMounted(() => {
     lineNumbers: true,
     autofocus: true,
     lineWrapping: true,
-    styleActiveLine: true,
+    // The full-width band CodeMirror paints behind the cursor's line is more
+    // distracting than useful in a writing app, where the eye is already on
+    // the caret.
+    styleActiveLine: false,
     direction: textDirection,
     viewportMargin: Infinity,
     lineNumberFormatter (line: number) {

@@ -52,6 +52,15 @@ const isCharacter = (line: string, next: string | undefined): boolean => {
   return CHARACTER_REG.test(trimmed) && !TRANSITION_REG.test(trimmed)
 }
 
+/** Lines that are structurally something other than dialogue, whatever the
+ *  surrounding blank lines say. */
+const endsDialogue = (line: string): boolean => {
+  const trimmed = line.trim()
+  if (!trimmed) return true
+  if (SCENE_HEADING_REG.test(trimmed) || TRANSITION_REG.test(trimmed)) return true
+  return /^[.#=>]/.test(trimmed) && !trimmed.startsWith('..')
+}
+
 /**
  * Strip boneyard comments and inline notes (`[[ … ]]`), which may both span
  * lines, before any line-oriented parsing happens.
@@ -96,13 +105,24 @@ const parseTitlePage = (lines: string[]): { title: Record<string, string>; next:
       index++
       break
     }
+
     const match = line.match(TITLE_PAGE_KEY_REG)
-    if (match) {
-      key = match[1].trim().toLowerCase()
-      title[key] = match[2].trim()
-    } else if (key) {
-      // Indented continuation of the previous key.
+    const matchedKey = match ? match[1].trim().toLowerCase() : ''
+
+    if (matchedKey && TITLE_PAGE_KEYS.has(matchedKey)) {
+      key = matchedKey
+      title[key] = match![2].trim()
+    } else if (key && /^\s+\S/.test(line)) {
+      // Continuation lines are indented; that indent is the only thing
+      // separating them from the body.
       title[key] = `${title[key]}\n${line.trim()}`.trim()
+    } else {
+      // Anything else means the title page is over, even without the blank
+      // line that should have ended it. Without this the first script line
+      // that happens to contain a colon - `FADE IN:` being the obvious one -
+      // is read as another key, and every line after it as that key's
+      // continuation, swallowing the whole screenplay.
+      break
     }
   }
   return { title, next: index }
@@ -181,8 +201,12 @@ export const parseFountain = (source: string): FountainScript => {
     if (isCharacter(raw, lines[i + 1])) {
       flushAction()
       tokens.push({ type: 'character', text: line.replace(/^@/, '').replace(/\s*\^$/, '') })
-      // Everything up to the next blank line belongs to this cue.
-      for (i++; i < lines.length && !isBlank(lines[i]); i++) {
+      // Everything up to the next blank line belongs to this cue - or up to a
+      // line that cannot be dialogue whatever the blank lines say. A valid
+      // screenplay always separates these with a blank line, so this only
+      // affects malformed input, where it stops one missing blank line from
+      // turning the rest of the script into dialogue.
+      for (i++; i < lines.length && !isBlank(lines[i]) && !endsDialogue(lines[i]); i++) {
         const speech = lines[i].trim()
         if (speech.startsWith('(') && speech.endsWith(')')) {
           tokens.push({ type: 'parenthetical', text: speech })
@@ -190,6 +214,10 @@ export const parseFountain = (source: string): FountainScript => {
           tokens.push({ type: 'dialogue', text: speech })
         }
       }
+      // Step back onto the line that ended the run so the outer loop's `i++`
+      // re-examines it rather than swallowing it. Harmless when that line is
+      // blank, which is the usual case.
+      i--
       continue
     }
 

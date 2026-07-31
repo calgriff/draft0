@@ -25,6 +25,44 @@ describe('parseFountain', () => {
     expect(tokens[1]).toEqual({ type: 'action', text: 'Something: happens later.' })
   })
 
+  it('ends the title page at the first line that is not a known key', () => {
+    // `FADE IN:` looks exactly like a `Key: value` pair. Treating it as one
+    // made it swallow the entire screenplay as that key's continuation.
+    const { title, tokens } = parseFountain(
+      ['Title: Big Fish', 'Author: John August', 'FADE IN:', '', 'INT. HOUSE - DAY'].join('\n')
+    )
+
+    expect(Object.keys(title)).toEqual(['title', 'author'])
+    expect(tokens.map((t) => t.type)).toEqual(['action', 'scene_heading'])
+
+    // Even with the blank line missing the body must still be parsed, rather
+    // than absorbed into the title page.
+    const noBlank = parseFountain(
+      ['Title: Big Fish', 'FADE IN:', 'INT. HOUSE - DAY'].join('\n')
+    )
+    expect(Object.keys(noBlank.title)).toEqual(['title'])
+    expect(noBlank.tokens.length).toBeGreaterThan(0)
+  })
+
+  it('keeps indented continuation lines with their title-page key', () => {
+    const { title } = parseFountain(['Contact:', '  1 Fake Street', '  London', '', 'Action.'].join('\n'))
+
+    expect(title.contact).toBe('1 Fake Street\nLondon')
+  })
+
+  it('does not lose the line that ends a dialogue run', () => {
+    // A dialogue run normally ends at a blank line; when one is missing it
+    // ends at the next structural line instead, which must still be parsed.
+    const { tokens } = parseFountain(['STEEL', 'Hello.', 'CUT TO:', 'INT. HOUSE - DAY'].join('\n'))
+
+    expect(tokens.map((t) => t.type)).toEqual([
+      'character',
+      'dialogue',
+      'transition',
+      'scene_heading'
+    ])
+  })
+
   it('recognises scene headings, forced headings and scene numbers', () => {
     const { tokens } = parseFountain(
       ['EXT. BEACH - DAY #1#', '', 'Waves.', '', '.A FORCED SLUG', '', 'More.'].join('\n')
