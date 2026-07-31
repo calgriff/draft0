@@ -89,6 +89,11 @@ export default defineConfig({
     },
     optimizeDeps: {
       include: ['pako', 'pathe'],
+      // The editor engine is a workspace package edited alongside the app, so
+      // keep it out of the dependency pre-bundle: a pre-bundled copy is cached
+      // until the cache is invalidated, and edits to packages/muya would not
+      // show up on a plain reload.
+      exclude: ['@muyajs/core'],
       esbuildOptions: {
         define: {
           global: 'globalThis'
