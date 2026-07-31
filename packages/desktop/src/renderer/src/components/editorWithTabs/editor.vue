@@ -1070,17 +1070,17 @@ const imageCropAction = async (src: string, rect: ICropRect): Promise<string | n
   const ext = window.path.extname(sourcePath).toLowerCase()
   const mime = CROP_MIME_BY_EXT[ext] ?? 'image/png'
 
-  // Hand the dialog the bytes as a blob URL rather than a `file://` src: a
-  // file:// image is cross-origin to the renderer, which taints the canvas the
-  // crop draws into and makes its `toBlob()` throw. A blob URL is same-origin.
-  let objectUrl = ''
+  // Decode from the file's own bytes. Loading the image over `file://` would
+  // taint the canvas the crop draws into and make its `toBlob()` throw, since
+  // that URL is cross-origin to the renderer.
+  let source: Blob
   try {
     const bytes = await window.fileUtils.readFile(sourcePath)
     const data = bytes instanceof Uint8Array ? bytes : new TextEncoder().encode(String(bytes))
     // TS lib types `Uint8Array<ArrayBufferLike>`, which does not satisfy
     // BlobPart's stricter ArrayBuffer expectation; the runtime value is a plain
     // Uint8Array. Same cast as `getHash` in util/fileSystem.ts.
-    objectUrl = URL.createObjectURL(new Blob([data as unknown as ArrayBuffer], { type: mime }))
+    source = new Blob([data as unknown as ArrayBuffer], { type: mime })
   } catch (err) {
     log.error('Failed to read image for cropping:', err)
     warn(t('imageCrop.notFound'))
@@ -1089,7 +1089,9 @@ const imageCropAction = async (src: string, rect: ICropRect): Promise<string | n
 
   let blob: Blob | null = null
   try {
-    const bitmap = await createImageBitmap(await (await fetch(objectUrl)).blob())
+    // Decoded straight from the Blob: a `blob:` URL would add a fetch the
+    // renderer's content-security policy has no reason to allow.
+    const bitmap = await createImageBitmap(source)
     const canvas = document.createElement('canvas')
     // Crop at the image's own resolution: the frame was drawn over a scaled
     // copy, but `rect` is expressed in fractions precisely so that scale does
@@ -1117,8 +1119,6 @@ const imageCropAction = async (src: string, rect: ICropRect): Promise<string | n
     log.error('Failed to crop image:', err)
     warn(t('imageCrop.failed'))
     return null
-  } finally {
-    URL.revokeObjectURL(objectUrl)
   }
   if (!blob) return null
 
@@ -1140,7 +1140,8 @@ const imageCropAction = async (src: string, rect: ICropRect): Promise<string | n
     notice.notify({
       title: t('imageCrop.title'),
       type: 'error',
-      message: (err as { message?: string } | null | undefined)?.message ?? ''
+      message:
+        (err as { message?: string } | null | undefined)?.message ?? t('imageCrop.writeFailed')
     })
     return null
   }

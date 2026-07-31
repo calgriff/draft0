@@ -362,12 +362,10 @@
   },
   "imageCrop": {
     "title": "Crop Image",
-    "hint": "Drag across the image to choose the area to keep.",
     "saveFirst": "Save the document first so the image path can be resolved.",
     "notFound": "That image could not be read from disk.",
-    "reset": "Reset",
-    "cancel": "Cancel",
-    "crop": "Crop"
+    "failed": "The image could not be cropped.",
+    "writeFailed": "The cropped image could not be saved."
   },
   "recent": {
     "noTabsOpen": "You have no tabs open.",
