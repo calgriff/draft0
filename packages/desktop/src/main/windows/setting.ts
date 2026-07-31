@@ -5,7 +5,8 @@ import { electronLocalshortcut } from '@hfelix/electron-localshortcut'
 import BaseWindow, { WindowLifecycle, WindowType, type EnvLike, type PreferenceLike } from './base'
 import type Accessor from '../app/accessor'
 import { centerWindowOptions } from './utils'
-import { TITLE_BAR_HEIGHT, preferencesWinOptions, isLinux, isOsx } from '../config'
+import { TITLE_BAR_HEIGHT, preferencesWinOptions, isOsx, isWindows } from '../config'
+import { getStaticPath } from '../globalSetting'
 import log from 'electron-log'
 
 class SettingWindow extends BaseWindow {
@@ -33,11 +34,8 @@ class SettingWindow extends BaseWindow {
         y?: number
       }
     )
-    if (isLinux) {
-      winOptions.icon = path.join(
-        (global as unknown as { __static: string }).__static,
-        'logo-96px.png'
-      )
+    if (!isOsx) {
+      winOptions.icon = path.join(getStaticPath(), isWindows ? 'icon.ico' : 'logo-96px.png')
     }
 
     // WORKAROUND: Electron has issues with different DPI per monitor when

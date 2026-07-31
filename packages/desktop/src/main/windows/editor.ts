@@ -7,7 +7,8 @@ import { isChildOfDirectory, isSamePathSync } from 'common/filesystem/paths'
 import BaseWindow, { WindowLifecycle, WindowType } from './base'
 import type Accessor from '../app/accessor'
 import { ensureWindowPosition, zoomIn, zoomOut } from './utils'
-import { TITLE_BAR_HEIGHT, editorWinOptions, isLinux, isOsx } from '../config'
+import { TITLE_BAR_HEIGHT, editorWinOptions, isOsx, isWindows } from '../config'
+import { getStaticPath } from '../globalSetting'
 import { showEditorContextMenu } from '../contextMenu/editor'
 import { loadMarkdownFile } from '../filesystem/markdown'
 import { switchLanguage } from '../spellchecker'
@@ -104,8 +105,14 @@ class EditorWindow extends BaseWindow {
       editorWinOptions,
       options
     )
-    if (isLinux) {
-      winOptions.icon = path.join(process.cwd(), 'static', 'logo-96px.png')
+    // Packaged Windows/macOS builds take the icon from the executable or app
+    // bundle, but in development the host binary is Electron's own, so the
+    // window would wear Electron's icon. Setting it explicitly makes dev match
+    // the shipped app. Resolved via `__static`, which is correct in both
+    // development and packaged builds (`process.cwd()` was neither).
+    const brandIcon = isWindows ? 'icon.ico' : 'logo-96px.png'
+    if (!isOsx) {
+      winOptions.icon = path.join(getStaticPath(), brandIcon)
     }
 
     const {
