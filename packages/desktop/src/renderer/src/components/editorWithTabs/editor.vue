@@ -1,7 +1,7 @@
 <template>
   <div
     class="editor-wrapper"
-    :class="[{ typewriter: typewriter, focus: focus, source: sourceCode }]"
+    :class="[{ typewriter: typewriter, focus: focus, source: inSourceView }]"
     :dir="textDirection"
   >
     <div
@@ -72,12 +72,22 @@
         </div>
       </template>
     </el-dialog>
-    <editor-search v-if="!sourceCode" />
+    <editor-search v-if="!inSourceView" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch, onMounted, onBeforeUnmount, nextTick, markRaw } from 'vue'
+import {
+  ref,
+  reactive,
+  computed,
+  watch,
+  onMounted,
+  onBeforeUnmount,
+  nextTick,
+  markRaw
+} from 'vue'
+import { useFountainTab } from '@/composables/useFountainTab'
 import log from 'electron-log'
 import {
   Muya,
@@ -121,9 +131,17 @@ import Printer from '@/services/printService'
 import { SpellcheckerLanguageCommand } from '@/commands'
 import { SpellChecker } from '@/spellchecker'
 import { isOsx, animatedScrollTo } from '@/util'
-import { moveImageToFolder, uploadImage } from '@/util/fileSystem'
+import { moveImageToFolder, uploadImage, writeCroppedImage } from '@/util/fileSystem'
+import { resolveLocalImageSrc } from '@/util/resolveImageSrc'
+import { exportScreenplayHTML } from '@/util/exportScreenplay'
 import { guessClipboardFilePath } from '@/util/clipboard'
-import { getCssForOptions, getHtmlToc, type PdfCssOptions, type HtmlTocOptions } from '@/util/pdf'
+import {
+  getCssForOptions,
+  getHtmlToc,
+  CURRENT_THEME_VALUE,
+  type PdfCssOptions,
+  type HtmlTocOptions
+} from '@/util/pdf'
 import { resolveTocHeadingElement } from '@/util/tocNavigation'
 import { addCommonStyle, setEditorWidth } from '@/util/theme'
 import { usePreferencesStore } from '@/store/preferences'
@@ -257,6 +275,12 @@ const { currentFile, tabs } = storeToRefs(editorStore)
 
 // Project store refs
 const { projectTree } = storeToRefs(projectStore)
+
+const { isFountainTab } = useFountainTab()
+
+// A Fountain tab is edited as source regardless of the global preference, so
+// the WYSIWYG engine must be hidden and its commands blocked for it too.
+const inSourceView = computed(() => sourceCode.value || isFountainTab.value)
 
 // Component state
 const defaultFontFamily = DEFAULT_EDITOR_FONT_FAMILY
@@ -970,7 +994,7 @@ const imageAction = async (
     }
   }
 
-  if (id && sourceCode.value) {
+  if (id && inSourceView.value) {
     bus.emit('image-action', {
       id,
       result: destImagePath,
@@ -989,6 +1013,68 @@ const muyaImageAction = (state: { src: string; alt?: string; title?: string }): 
 
 const imagePathPicker = () => {
   return editorStore.ASK_FOR_IMAGE_PATH()
+}
+
+const CROP_MIME_BY_EXT: Record<string, string> = {
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.webp': 'image/webp'
+}
+
+/**
+ * Crop the image at `src` and return the src to write back into the document.
+ *
+ * The first crop writes a sibling `<name>.crop.<ext>` and the document points
+ * at that; cropping again overwrites that file. Because the path then doesn't
+ * change, a `?v=` counter is appended so the renderer refetches instead of
+ * showing the pre-crop image from cache — `resolveLocalImageSrc` and the file
+ * loader both ignore the query.
+ */
+const imageCropAction = async (src: string): Promise<string | null> => {
+  if (!currentFile.value) return null
+  const { pathname: currentPathname } = currentFile.value
+
+  const [rawPath, query] = src.split(/\?(.*)/s)
+  const baseDir = currentPathname ? window.path.dirname(currentPathname) : window.DIRNAME
+  if (!baseDir) return null
+  const sourcePath = window.path.isAbsolute(rawPath)
+    ? rawPath
+    : window.path.resolve(baseDir, rawPath)
+
+  const ext = window.path.extname(sourcePath).toLowerCase()
+  const mime = CROP_MIME_BY_EXT[ext] ?? 'image/png'
+
+  const blob = await new Promise<Blob | null>((resolve) => {
+    bus.emit('showImageCropDialog', {
+      displaySrc: resolveLocalImageSrc(rawPath),
+      mime,
+      resolve
+    })
+  })
+  if (!blob) return null
+
+  try {
+    const data = new Uint8Array(await blob.arrayBuffer())
+    const written = await writeCroppedImage(sourcePath, data)
+    const overwroteInPlace = written === sourcePath
+
+    const nextPath = overwroteInPlace
+      ? rawPath
+      : window.path.isAbsolute(rawPath)
+        ? written
+        : window.path.relative(baseDir, written)
+
+    const version = Number(new URLSearchParams(query ?? '').get('v') ?? 0) + 1
+    return `${nextPath}?v=${version}`
+  } catch (err) {
+    log.error('Failed to write cropped image:', err)
+    notice.notify({
+      title: t('imageCrop.title'),
+      type: 'error',
+      message: (err as { message?: string } | null | undefined)?.message ?? ''
+    })
+    return null
+  }
 }
 
 const keyup = (event: KeyboardEvent) => {
@@ -1063,7 +1149,7 @@ const replaceMisspelling = (payload: unknown) => {
 }
 
 const handleUndo = () => {
-  if (sourceCode.value) {
+  if (inSourceView.value) {
     return
   }
 
@@ -1073,7 +1159,7 @@ const handleUndo = () => {
 }
 
 const handleRedo = () => {
-  if (sourceCode.value) {
+  if (inSourceView.value) {
     return
   }
 
@@ -1083,7 +1169,7 @@ const handleRedo = () => {
 }
 
 const handleSelectAll = () => {
-  if (sourceCode.value) {
+  if (inSourceView.value) {
     return
   }
 
@@ -1118,7 +1204,7 @@ const handleCopyPaste = (type: unknown) => {
 }
 
 const insertImage = (src: unknown) => {
-  if (!sourceCode.value) {
+  if (!inSourceView.value) {
     editor.value && editor.value.insertImage({ src })
   }
 }
@@ -1270,6 +1356,50 @@ interface ExportOptions {
   [key: string]: unknown
 }
 
+/**
+ * Export the active Fountain tab. The screenplay is built from the tab's own
+ * source rather than `editor.getMarkdown()`: the WYSIWYG engine holds the
+ * fountain text parsed as markdown, which would come back reflowed.
+ */
+const exportScreenplay = async (type: string, opts: ExportOptions, extraCss: string) => {
+  const source = props.markdown ?? ''
+  const html = exportScreenplayHTML(source, {
+    title: opts.htmlTitle ?? '',
+    extraCss,
+    dir: props.textDirection
+  })
+
+  try {
+    switch (type) {
+      case 'styledHtml':
+        editorStore.EXPORT({ type, content: html })
+        break
+      case 'pdf': {
+        const { pageSize, pageSizeWidth, pageSizeHeight, isLandscape } = opts
+        printer!.renderMarkdown(html, true, props.textDirection)
+        editorStore.EXPORT({
+          type,
+          pageOptions: { pageSize, pageSizeWidth, pageSizeHeight, isLandscape }
+        })
+        break
+      }
+      case 'print':
+        printer!.renderMarkdown(html, true, props.textDirection)
+        editorStore.PRINT_RESPONSE()
+        break
+    }
+  } catch (err) {
+    log.error('Failed to export screenplay:', err)
+    notice.notify({
+      title: t('editor.export.failed', { type }),
+      type: 'error',
+      message:
+        (err as { message?: string } | null | undefined)?.message ?? t('editor.export.error')
+    })
+    handlePrintServiceClearup()
+  }
+}
+
 const handleExport = async (options: unknown) => {
   const opts = options as ExportOptions
   const { type, headerFooterStyled, htmlTitle } = opts
@@ -1278,7 +1408,20 @@ const handleExport = async (options: unknown) => {
     throw new Error(`Invalid type to export: "${type}".`)
   }
 
+  // "Current editor theme" means the fonts too, so seed the font options from
+  // the editor preferences unless the dialog's font override supplied them.
+  if (opts.theme === CURRENT_THEME_VALUE && opts.fontSize == null) {
+    opts.fontFamily = editorFontFamily.value || undefined
+    opts.fontSize = fontSize.value
+    opts.lineHeight = lineHeight.value
+  }
+
   const extraCss = await getCssForOptions(opts as unknown as PdfCssOptions)
+
+  if (isFountainTab.value) {
+    return exportScreenplay(type, opts, extraCss)
+  }
+
   const htmlToc = getHtmlToc(editor.value.getTOC(), opts as unknown as HtmlTocOptions)
   const markdown = editor.value.getMarkdown()
   const header = (opts.header ?? null) as HeaderFooterPart | null
@@ -1289,7 +1432,6 @@ const handleExport = async (options: unknown) => {
       try {
         const content = await exportStyledHTML(editor.value, markdown, {
           title: htmlTitle || '',
-          printOptimization: false,
           extraCss,
           toc: htmlToc,
           dir: props.textDirection
@@ -1319,7 +1461,6 @@ const handleExport = async (options: unknown) => {
 
         const html = await exportStyledHTML(editor.value, markdown, {
           title: '',
-          printOptimization: true,
           extraCss,
           toc: htmlToc,
           header,
@@ -1345,7 +1486,6 @@ const handleExport = async (options: unknown) => {
       try {
         const html = await exportStyledHTML(editor.value, markdown, {
           title: '',
-          printOptimization: true,
           extraCss,
           toc: htmlToc,
           header,
@@ -1393,7 +1533,7 @@ const handleEditParagraph = (type: unknown) => {
   // These commands act on the hidden WYSIWYG engine, so block them in
   // source-code mode (mirrors handleUndo/handleSelectAll) — otherwise e.g. the
   // Insert Table wizard opens and writes to the invisible editor (#3531).
-  if (sourceCode.value) {
+  if (inSourceView.value) {
     return
   }
   if (type === 'table') {
@@ -1416,7 +1556,7 @@ const handleEditParagraph = (type: unknown) => {
 
 // handle `duplicate`, `delete`, `create paragraph below`
 const handleParagraph = (type: unknown) => {
-  if (sourceCode.value) {
+  if (inSourceView.value) {
     return
   }
   if (editor.value) {
@@ -1437,7 +1577,7 @@ const handleParagraph = (type: unknown) => {
 }
 
 const handleInlineFormat = (type: unknown) => {
-  if (sourceCode.value) {
+  if (inSourceView.value) {
     return
   }
   editor.value && editor.value.format(type)
@@ -1767,6 +1907,7 @@ onMounted(() => {
     // Without these, local-file drag-drop, screenshot/binary clipboard paste, and
     // copy-to-assets on a pasted image file silently no-op or insert raw paths.
     imageAction: muyaImageAction,
+    imageCropAction,
     getPathForFile: (file: File) => window.electron.webUtils.getPathForFile(file)
   }
 
