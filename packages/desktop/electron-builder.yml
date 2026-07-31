@@ -1,5 +1,5 @@
-appId: com.github.marktext.marktext
-productName: marktext
+appId: com.draft0.draft0
+productName: draft0
 directories:
   buildResources: build
   output: ../../dist
@@ -90,15 +90,21 @@ fileAssociations:
     mimeType: text/markdown
     role: Editor
     icon: icons/md.ico
+  - ext: fountain
+    name: Fountain
+    description: Fountain screenplay
+    mimeType: text/plain
+    role: Editor
+    icon: icons/md.ico
 win:
-  executableName: marktext
-  artifactName: 'marktext-win-${arch}-${version}.${ext}'
+  executableName: draft0
+  artifactName: 'draft0-win-${arch}-${version}.${ext}'
   target:
     - target: 'nsis'
     - target: 'zip'
   icon: static/icon.ico
 nsis:
-  artifactName: 'marktext-win-${arch}-${version}-setup.${ext}'
+  artifactName: 'draft0-win-${arch}-${version}-setup.${ext}'
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: true
@@ -108,7 +114,7 @@ nsis:
   perMachine: false
   include: windows/installer.nsh
 mac:
-  artifactName: 'marktext-mac-${arch}-${version}.${ext}'
+  artifactName: 'draft0-mac-${arch}-${version}.${ext}'
   entitlementsInherit: build/mac/entitlements.mac.plist
   extendInfo:
     - NSCameraUsageDescription: Application requests access to the device's camera.
@@ -120,7 +126,7 @@ mac:
     - dmg
     - zip
 dmg:
-  artifactName: 'marktext-mac-${arch}-${version}.${ext}'
+  artifactName: 'draft0-mac-${arch}-${version}.${ext}'
   contents:
     - x: 410
       y: 240
@@ -130,18 +136,18 @@ dmg:
       y: 240
       type: 'file'
 linux:
-  artifactName: 'marktext-linux-${version}.${ext}'
-  executableName: 'marktext'
-  description: 'A simple and elegant open-source markdown editor that focused on speed and usability.'
-  maintainer: 'MarkText Contributors'
+  artifactName: 'draft0-linux-${version}.${ext}'
+  executableName: 'draft0'
+  description: 'A minimal editor for markdown and Fountain screenplays.'
+  maintainer: 'draft0'
   category: 'Office;TextEditor;Utility'
   mimeTypes:
     - 'text/markdown'
   icon: 'static/icon.png'
   desktop:
     entry:
-      StartupWMClass: 'marktext'
-      Keywords: 'marktext;'
+      StartupWMClass: 'draft0'
+      Keywords: 'draft0;markdown;screenplay;fountain;'
   target:
     - AppImage
     - snap
@@ -167,3 +173,6 @@ linux:
     - ext: 'mdtext'
       name: 'Markdown'
       description: 'Markdown document'
+    - ext: 'fountain'
+      name: 'Fountain'
+      description: 'Fountain screenplay'

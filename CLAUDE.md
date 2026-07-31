@@ -55,7 +55,7 @@ root holds only shared tooling and CI-facing scripts.
                             `directories.output: ../../dist` so CI artifact
                             globs `dist/*` still apply).
   packages/
-    desktop/                The Electron app (name: "marktext").
+    desktop/                The Electron app (name: "draft0").
       package.json          Holds all Electron / Vue / build-time deps and
                             the dev/build/test/typecheck scripts. Depends on
                             @marktext/muyajs via workspace:*.
@@ -142,7 +142,7 @@ The root has no `src/`, `test/`, `static/`, or `build/` of its own anymore — t
 ## Development Workflow
 
 All commands run from the repo root. The root `package.json` proxies every
-desktop-specific script to `packages/desktop` via `pnpm --filter marktext`,
+desktop-specific script to `packages/desktop` via `pnpm --filter draft0`,
 so the names and behavior are unchanged from the pre-monorepo layout.
 
 ```bash

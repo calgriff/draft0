@@ -19,7 +19,7 @@
         class="title"
         @dblclick.stop="toggleMaxmizeOnMacOS"
       >
-        <span v-if="!filename">MarkText</span>
+        <span v-if="!filename">draft0</span>
         <span v-else>
           <span
             v-for="(path, index) of paths"
@@ -353,7 +353,9 @@ img {
   padding: 0 142px;
   height: 100%;
   line-height: var(--titleBarHeight);
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
   text-align: center;
   transition: all 0.25s ease-in-out;
   & .filename {
@@ -396,7 +398,7 @@ div.title > span {
   visibility: visible;
 }
 .title:hover {
-  color: var(sideBarTitleColor);
+  color: var(--sideBarTitleColor);
 }
 
 .left-toolbar {

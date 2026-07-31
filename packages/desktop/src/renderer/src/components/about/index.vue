@@ -9,12 +9,13 @@
     >
       <img
         class="logo"
-        :src="MarkTextLogo"
+        :src="Draft0Logo"
+        alt=""
       >
       <el-row>
         <el-col :span="24">
-          <h3 class="title">
-            {{ name }}
+          <h3 class="title wordmark">
+            draft<span class="zero">0</span><span class="caret" />
           </h3>
         </el-col>
         <el-col :span="24">
@@ -44,12 +45,11 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useMainStore } from '@/store'
 import bus from '../../bus'
-import MarkTextLogo from '../../assets/images/logo.png'
+import Draft0Logo from '../../assets/images/logo.png'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 
-const name = 'MarkText'
 const copyright = t('about.copyright', { year: new Date().getFullYear() })
 const copyrightContributors = t('about.copyrightContributors')
 const showAboutDialog = ref(false)
@@ -81,6 +81,27 @@ onBeforeUnmount(() => {
   height: 80px;
   display: inherit;
   margin: 0 auto;
+  border-radius: 18px;
+}
+
+/* Live text rather than an image, so the wordmark stays crisp at any zoom and
+   picks up the theme colours. Mirrors the icon: Plex Mono with a caret. */
+.about-dialog .wordmark {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  color: var(--editorColor80);
+}
+
+.about-dialog .wordmark .caret {
+  display: inline-block;
+  width: 2px;
+  height: 0.95em;
+  margin-left: 4px;
+  vertical-align: -0.12em;
+  border-radius: 1px;
+  background: var(--themeColor);
 }
 
 .about-dialog .title,

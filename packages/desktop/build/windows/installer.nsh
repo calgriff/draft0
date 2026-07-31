@@ -1,27 +1,35 @@
-; installer.nsh — include via electron-builder’s nsis.include
+; installer.nsh — include via electron-builder's nsis.include
 
 ;======================================================================
 ; customInstall macro is invoked by electron-builder after files are in $INSTDIR
 !macro customInstall
   ; Ask the user if they want to register file associations
   MessageBox MB_YESNO|MB_ICONQUESTION \
-  "Do you want to associate Markdown files (.md, .markdown, .mmd, .mdown, .mdtext, .mdx) with MarkText?" /SD IDNO IDNO SkipAssoc
+  "Do you want to associate Markdown (.md, .markdown, .mmd, .mdown, .mdtext, .mdx) and Fountain (.fountain) files with draft0?" /SD IDNO IDNO SkipAssoc
 
   ;— User clicked YES, perform the registry writes —
-  WriteRegStr HKCU "Software\Classes\.md"       "" "MarkText.Document"
-  WriteRegStr HKCU "Software\Classes\.markdown" "" "MarkText.Document"
-  WriteRegStr HKCU "Software\Classes\.mmd"      "" "MarkText.Document"
-  WriteRegStr HKCU "Software\Classes\.mdown"    "" "MarkText.Document"
-  WriteRegStr HKCU "Software\Classes\.mdtxt"    "" "MarkText.Document"
-  WriteRegStr HKCU "Software\Classes\.mdtext"   "" "MarkText.Document"
-  WriteRegStr HKCU "Software\Classes\.mdx"      "" "MarkText.Document"
+  WriteRegStr HKCU "Software\Classes\.md"       "" "draft0.Document"
+  WriteRegStr HKCU "Software\Classes\.markdown" "" "draft0.Document"
+  WriteRegStr HKCU "Software\Classes\.mmd"      "" "draft0.Document"
+  WriteRegStr HKCU "Software\Classes\.mdown"    "" "draft0.Document"
+  WriteRegStr HKCU "Software\Classes\.mdtxt"    "" "draft0.Document"
+  WriteRegStr HKCU "Software\Classes\.mdtext"   "" "draft0.Document"
+  WriteRegStr HKCU "Software\Classes\.mdx"      "" "draft0.Document"
+  WriteRegStr HKCU "Software\Classes\.fountain" "" "draft0.Screenplay"
 
-  WriteRegStr HKCU "Software\Classes\MarkText.Document" \
-    "" "MarkText Markdown Document"
-  WriteRegExpandStr HKCU "Software\Classes\MarkText.Document\DefaultIcon" \
+  WriteRegStr HKCU "Software\Classes\draft0.Document" \
+    "" "draft0 Markdown Document"
+  WriteRegExpandStr HKCU "Software\Classes\draft0.Document\DefaultIcon" \
     "" "$INSTDIR\resources\icons\md.ico,0"
-  WriteRegExpandStr HKCU "Software\Classes\MarkText.Document\shell\open\command" \
-    "" '"$INSTDIR\marktext.exe" "%1"'
+  WriteRegExpandStr HKCU "Software\Classes\draft0.Document\shell\open\command" \
+    "" '"$INSTDIR\draft0.exe" "%1"'
+
+  WriteRegStr HKCU "Software\Classes\draft0.Screenplay" \
+    "" "draft0 Fountain Screenplay"
+  WriteRegExpandStr HKCU "Software\Classes\draft0.Screenplay\DefaultIcon" \
+    "" "$INSTDIR\resources\icons\md.ico,0"
+  WriteRegExpandStr HKCU "Software\Classes\draft0.Screenplay\shell\open\command" \
+    "" '"$INSTDIR\draft0.exe" "%1"'
 
 SkipAssoc:
 !macroend
@@ -30,13 +38,18 @@ SkipAssoc:
 ; customUnInstall macro cleans up on uninstall
 !macro customUnInstall
   ; Delete the open command subtree
-  DeleteRegKey HKCU "Software\Classes\MarkText.Document\shell\open\command"
-  DeleteRegKey HKCU "Software\Classes\MarkText.Document\shell\open"
-  DeleteRegKey HKCU "Software\Classes\MarkText.Document\shell"
+  DeleteRegKey HKCU "Software\Classes\draft0.Document\shell\open\command"
+  DeleteRegKey HKCU "Software\Classes\draft0.Document\shell\open"
+  DeleteRegKey HKCU "Software\Classes\draft0.Document\shell"
+  DeleteRegKey HKCU "Software\Classes\draft0.Screenplay\shell\open\command"
+  DeleteRegKey HKCU "Software\Classes\draft0.Screenplay\shell\open"
+  DeleteRegKey HKCU "Software\Classes\draft0.Screenplay\shell"
 
   ; Delete the DefaultIcon and ProgID
-  DeleteRegKey HKCU "Software\Classes\MarkText.Document\DefaultIcon"
-  DeleteRegKey HKCU "Software\Classes\MarkText.Document"
+  DeleteRegKey HKCU "Software\Classes\draft0.Document\DefaultIcon"
+  DeleteRegKey HKCU "Software\Classes\draft0.Document"
+  DeleteRegKey HKCU "Software\Classes\draft0.Screenplay\DefaultIcon"
+  DeleteRegKey HKCU "Software\Classes\draft0.Screenplay"
 
   ; Delete each extension mapping
   DeleteRegKey HKCU "Software\Classes\.md"
@@ -46,9 +59,10 @@ SkipAssoc:
   DeleteRegKey HKCU "Software\Classes\.mdtxt"
   DeleteRegKey HKCU "Software\Classes\.mdtext"
   DeleteRegKey HKCU "Software\Classes\.mdx"
+  DeleteRegKey HKCU "Software\Classes\.fountain"
 
   MessageBox MB_YESNO "Do you want to delete user settings?" /SD IDNO IDNO SkipRemoval
     SetShellVarContext current
-    RMDir /r "$APPDATA\marktext"
+    RMDir /r "$APPDATA\draft0"
   SkipRemoval:
 !macroend

@@ -1,7 +1,7 @@
 {
-  "name": "marktext",
+  "name": "draft0",
   "version": "0.20.0-dev",
-  "description": "MarkText",
+  "description": "draft0 — a markdown and screenplay editor",
   "main": "./out/main/index.js",
   "author": {
     "name": "Jocs",

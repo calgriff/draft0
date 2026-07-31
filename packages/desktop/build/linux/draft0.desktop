@@ -1,17 +1,17 @@
 [Desktop Entry]
-Name=MarkText
-Comment=Next generation markdown editor
-Exec=marktext %F
+Name=draft0
+Comment=A minimal editor for markdown and Fountain screenplays
+Exec=draft0 %F
 Terminal=false
 Type=Application
-Icon=marktext
+Icon=draft0
 Categories=Office;TextEditor;Utility;
 MimeType=text/markdown;
-Keywords=marktext;
-StartupWMClass=marktext
+Keywords=draft0;markdown;screenplay;fountain;
+StartupWMClass=draft0
 Actions=NewWindow;
 
 [Desktop Action NewWindow]
 Name=New Window
-Exec=marktext --new-window %F
-Icon=marktext
+Exec=draft0 --new-window %F
+Icon=draft0

@@ -92,21 +92,21 @@
       "reportBug": "Report Bug",
       "viewSource": "View Source",
       "followUs": "Follow Us",
-      "support": "Support MarkText",
+      "support": "Support draft0",
       "license": "License",
       "about": "About",
       "checkUpdates": "Check for Updates"
     },
     "marktext": {
-      "title": "MarkText",
-      "about": "About MarkText",
+      "title": "draft0",
+      "about": "About draft0",
       "checkUpdates": "Check for Updates...",
       "preferences": "Preferences",
       "services": "Services",
-      "hide": "Hide MarkText",
+      "hide": "Hide draft0",
       "hideOthers": "Hide Others",
       "showAll": "Show All",
-      "quit": "Quit MarkText"
+      "quit": "Quit draft0"
     },
     "view": {
       "view": "View",
@@ -117,6 +117,7 @@
       "typewriterMode": "Typewriter Mode",
       "focusMode": "Focus Mode",
       "toggleTableOfContents": "Toggle Table of Contents",
+      "toggleScreenplayPreview": "Toggle Screenplay Preview",
       "reloadImages": "Reload Images",
       "showDeveloperTools": "Show Developer Tools",
       "reloadWindow": "Reload Window"
@@ -286,7 +287,9 @@
     "theme": {
       "label": "Theme",
       "description": "You can change the document appearance by choosing a theme or create a handcrafted one.",
-      "theme": "Theme"
+      "theme": "Theme",
+      "keepDarkBackground": "Keep dark background",
+      "keepDarkBackgroundDetail": "Export the theme's own background instead of forcing a light page."
     },
     "headerFooter": {
       "allowStyled": "Allow styled text",
@@ -331,11 +334,19 @@
         "styled": "Styled"
       },
       "themes": {
+        "currentTheme": "Current Editor Theme",
         "academic": "Academic",
         "default": "GitHub (Default)",
         "liber": "Liber"
       }
     }
+  },
+  "imageCrop": {
+    "title": "Crop Image",
+    "hint": "Drag across the image to choose the area to keep.",
+    "reset": "Reset",
+    "cancel": "Cancel",
+    "crop": "Crop"
   },
   "recent": {
     "noTabsOpen": "You have no tabs open.",
@@ -343,7 +354,7 @@
   },
   "import": {
     "title": "Import or Open",
-    "description": "Drop here to get your stuff into MarkText"
+    "description": "Drop here to get your stuff into draft0"
   },
   "preferences": {
     "title": "Preferences",
@@ -371,10 +382,10 @@
         "hideScrollbar": "Whether to hide scrollbars",
         "wordWrapInToc": "Whether to enable word wrap in TOC",
         "fileSortBy": "Sort files in opened folder by created time, modified time and title",
-        "startUpAction": "The action after MarkText startup, open the last edited content, open the specified folder or blank page",
+        "startUpAction": "The action after draft0 startup, open the last edited content, open the specified folder or blank page",
         "restoreLayoutState": "Restore previous editor state on startup",
         "defaultDirectoryToOpen": "The default directory that should be opened on startup when startUp=folder",
-        "language": "The language MarkText uses",
+        "language": "The language draft0 uses",
         "editorFontFamily": "Editor font family",
         "fontSize": "Font size in pixels",
         "lineHeight": "Line Height",
@@ -398,7 +409,7 @@
         "preferLooseListItem": "The preferred list type",
         "bulletListMarker": "The marker used in bullet list",
         "orderListDelimiter": "The delimiter used in order list",
-        "preferHeadingStyle": "The preferred heading style in MarkText",
+        "preferHeadingStyle": "The preferred heading style in draft0",
         "tabSize": "Replace the tab with x spaces",
         "listIndentation": "Select the indent of list",
         "frontmatterType": "The frontmatter type",
@@ -408,7 +419,7 @@
         "isGitlabCompatibilityEnabled": "Enable GitLab compatibility mode",
         "sequenceTheme": "Sequence diagram theme",
         "plantumlServer": "PlantUML server URL",
-        "theme": "Select the theme used in MarkText",
+        "theme": "Select the theme used in draft0",
         "followSystemTheme": "Follow System Theme",
         "lightModeTheme": "Theme to use when system is in light mode",
         "darkModeTheme": "Theme to use when system is in dark mode",
@@ -616,7 +627,7 @@
         "pleaseInstall": "Please install",
         "scriptPath": "Script path"
       },
-      "defaultBehavior": "The default behavior after pasting or dragging the image to MarkText"
+      "defaultBehavior": "The default behavior after pasting or dragging the image to draft0"
     },
     "markdown": {
       "title": "Markdown",
@@ -733,7 +744,7 @@
   },
   "commands": {
     "mt": {
-      "hide": "Hide MarkText",
+      "hide": "Hide draft0",
       "hideOthers": "Hide Others"
     },
     "file": {
@@ -899,7 +910,7 @@
     "configSchemaViolation": "Configuration schema violation",
     "copyError": "Copy error",
     "initializationFailed": "Initialization failed {hint}",
-    "otherInstanceDetected": "Another instance of MarkText is already running",
+    "otherInstanceDetected": "Another instance of draft0 is already running",
     "report": "Report",
     "startupError": "Startup error",
     "terminatedDueToError": "Terminated due to error",
