@@ -142,7 +142,18 @@ export const getCurrentThemeExportCss = (options: CurrentThemeCssOptions = {}): 
     lightSafe ? ensureContrast(value, pageBgRgb, minRatio) : value
 
   return `
-html { background: ${pageBg}; }
+/* Colours the whole sheet, margins included. The root element's background is
+   what propagates to the page canvas; --exportPageBg additionally releases the
+   white the print stylesheet would otherwise force. */
+:root { --exportPageBg: ${pageBg}; }
+html, body { background: ${pageBg}; }
+.fountain-script {
+  background: ${pageBg};
+  color: ${bodyColor};
+}
+.fountain-script .scene-heading { color: ${accent(tokens.headingColor, 4.5)}; }
+.fountain-script .section,
+.fountain-script .synopsis { color: ${accent(tokens.blockquoteTextColor, 4.5)}; }
 .markdown-body {
   background: ${pageBg};
   color: ${bodyColor};

@@ -81,6 +81,21 @@ export const getExportThemeList = (): PrefSelectOption<string>[] => [
   }
 ]
 
+/**
+ * A screenplay's layout is fixed by the Fountain format, so the document
+ * themes do not apply — but its colours can still follow the editor.
+ */
+export const getScreenplayThemeList = (): PrefSelectOption<string>[] => [
+  {
+    label: t('exportSettings.options.themes.currentTheme'),
+    value: 'currentTheme'
+  },
+  {
+    label: t('exportSettings.options.themes.plain'),
+    value: 'default'
+  }
+]
+
 // Retained for backward compatibility
 export const pageSizeList = getPageSizeList()
 export const headerFooterTypes = getHeaderFooterTypes()

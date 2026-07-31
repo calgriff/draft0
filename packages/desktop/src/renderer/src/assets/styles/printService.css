@@ -17,7 +17,7 @@ body article.print-container {
       Recent versions of chromemium will treat margins as "transparent" - but we should set it to white so it isn't so ugly.
       This should not affect the actual printing.
     */
-    background: white;
+    background: var(--exportPageBg, white);
     margin: 15mm 20mm 15mm 20mm;
   }
 
@@ -32,7 +32,12 @@ body article.print-container {
     width: 100% !important;
     display: block !important;
     height: auto !important;
-    background: #ffffff !important;
+    /* The root element's background is what propagates to the page canvas, so
+       this is the only thing that can colour the margins as well as the text
+       area. Forcing white here is why a themed export used to stop at the
+       margins; the export stylesheet sets `--exportPageBg` when it wants the
+       whole sheet coloured, and white remains the default. */
+    background: var(--exportPageBg, #ffffff) !important;
     overflow: hidden;
   }
 

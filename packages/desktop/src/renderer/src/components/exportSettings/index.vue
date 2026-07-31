@@ -161,18 +161,21 @@
           />
         </el-tab-pane>
         <el-tab-pane
-          v-if="!isFountainTab"
           :label="t('exportSettings.theme.label')"
           name="theme"
         >
           <div class="text">
-            {{ t('exportSettings.theme.description') }}
+            {{
+              isFountainTab
+                ? t('exportSettings.theme.screenplayDescription')
+                : t('exportSettings.theme.description')
+            }}
           </div>
           <cur-select
             :description="t('exportSettings.theme.theme')"
-            more="https://marktext.me/docs/export-themes"
-            :value="theme"
-            :options="themeList"
+            :more="isFountainTab ? undefined : 'https://marktext.me/docs/export-themes'"
+            :value="effectiveTheme"
+            :options="isFountainTab ? screenplayThemeList : themeList"
             :on-change="(value: unknown) => onSelectChange('theme', value)"
           />
           <bool
@@ -303,7 +306,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, watch, type Ref } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch, type Ref } from 'vue'
 import bus from '../../bus'
 import { loadExportSettings, saveExportSettings } from './persistence'
 import Bool from '@/prefComponents/common/bool/index.vue'
@@ -311,9 +314,15 @@ import CurSelect from '@/prefComponents/common/select/index.vue'
 import FontTextBox from '@/prefComponents/common/fontTextBox/index.vue'
 import Range from '@/prefComponents/common/range/index.vue'
 import TextBox from '@/prefComponents/common/textBox/index.vue'
-import { getPageSizeList, getHeaderFooterTypes, getExportThemeList } from './exportOptions'
+import {
+  getPageSizeList,
+  getHeaderFooterTypes,
+  getExportThemeList,
+  getScreenplayThemeList
+} from './exportOptions'
 import { useI18n } from 'vue-i18n'
 import { useFountainTab } from '@/composables/useFountainTab'
+import { CURRENT_THEME_VALUE } from '@/util/pdf'
 
 const { t } = useI18n()
 // A screenplay's layout comes from the Fountain format itself, so the
@@ -341,6 +350,13 @@ const autoNumberingHeadings = ref(false)
 const showFrontMatter = ref(false)
 const theme = ref('default')
 const keepDarkBackground = ref(false)
+const screenplayThemeList = ref(getScreenplayThemeList())
+
+// A document theme selected on a markdown tab means nothing to a screenplay,
+// so show (and export) it as plain rather than a stale, inapplicable name.
+const effectiveTheme = computed(() =>
+  isFountainTab.value && theme.value !== CURRENT_THEME_VALUE ? 'default' : theme.value
+)
 const themeList = ref(getExportThemeList())
 // Themes discovered under <userData>/themes/export, kept separately so a
 // locale change (which rebuilds the built-in list) doesn't drop them.
@@ -457,7 +473,7 @@ const handleClicked = () => {
     pageMarginLeft: pageMarginLeft.value,
     autoNumberingHeadings: autoNumberingHeadings.value,
     showFrontMatter: showFrontMatter.value,
-    theme: theme.value === 'default' ? null : theme.value,
+    theme: effectiveTheme.value === 'default' ? null : effectiveTheme.value,
     keepDarkBackground: keepDarkBackground.value,
     tocTitle: tocTitle.value,
     tocIncludeTopHeading: tocIncludeTopHeading.value

@@ -290,6 +290,7 @@
       "label": "Theme",
       "description": "You can change the document appearance by choosing a theme or create a handcrafted one.",
       "theme": "Theme",
+      "screenplayDescription": "A screenplay's layout is fixed by the Fountain format, but its colours can follow the editor.",
       "keepDarkBackground": "Keep dark background",
       "keepDarkBackgroundDetail": "Export the theme's own background instead of forcing a light page."
     },
@@ -337,6 +338,7 @@
       },
       "themes": {
         "currentTheme": "Current Editor Theme",
+        "plain": "Plain (Black on White)",
         "academic": "Academic",
         "default": "GitHub (Default)",
         "liber": "Liber"
