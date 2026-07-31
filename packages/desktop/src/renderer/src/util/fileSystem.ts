@@ -105,6 +105,33 @@ export const moveImageToFolder = async(
   }
 }
 
+/** Marks an image file this app produced by cropping, so a re-crop of the
+ *  same image overwrites it instead of leaving a trail of intermediates. */
+const CROPPED_FILE_REG = /\.crop\.(?:png|jpe?g|webp)$/i
+
+export const isCroppedImagePath = (pathname: string): boolean =>
+  CROPPED_FILE_REG.test(pathname)
+
+/**
+ * Write cropped image bytes to disk and return the absolute path they landed
+ * at. The first crop of an image creates a sibling `<name>.crop.<ext>` so the
+ * original survives; cropping that result again overwrites it in place.
+ */
+export const writeCroppedImage = async(
+  sourcePath: string,
+  data: Uint8Array
+): Promise<string> => {
+  let target = sourcePath
+  if (!isCroppedImagePath(sourcePath)) {
+    const ext = window.path.extname(sourcePath)
+    const base = window.path.basename(sourcePath, ext)
+    target = window.path.join(window.path.dirname(sourcePath), `${base}.crop${ext}`)
+  }
+
+  await window.fileUtils.writeFile(target, data)
+  return target
+}
+
 export interface UploadImagePreferences {
   currentUploader: string
   cliScript?: string

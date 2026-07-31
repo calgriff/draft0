@@ -5,7 +5,9 @@
 }
 
 .mu-image-toolbar {
-    width: 240px;
+    /* Sized by its items: the crop button is conditional, so the item count
+       varies between images. */
+    width: max-content;
     height: 30px;
 }
 

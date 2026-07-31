@@ -79,6 +79,16 @@ export interface IMuyaOptions {
      */
     imageAction?: (state: IImageActionState) => Promise<string>;
     /**
+     * Crop a local image and resolve to the src that should replace it, or
+     * `null` if the user cancelled.
+     *
+     * The embedder owns the crop UI and the write to disk; muya only rewrites
+     * the `src` attribute with whatever comes back. Omitting the hook removes
+     * the crop button from the image toolbar, which is also hidden for remote
+     * and SVG images since neither can be cropped meaningfully.
+     */
+    imageCropAction?: (src: string) => Promise<string | null>;
+    /**
      * Resolve a dropped `File` to a local filesystem path.
      *
      * The DnD `DataTransfer` exposes a `File` object but not its on-disk
