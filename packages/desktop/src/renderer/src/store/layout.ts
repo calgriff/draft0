@@ -50,6 +50,10 @@ export const useLayoutStore = defineStore('layout', () => {
   const showSideBar = ref(false)
   const showTabBar = ref(false)
   const sideBarWidth = ref<number>(initialSideBarWidth)
+  // Only has an effect on Fountain tabs. Not part of the buffered state: it is
+  // a per-session view toggle, on by default because a screenplay is written
+  // against its formatted output.
+  const showScreenplayPreview = ref(true)
 
   // Actual rendered sidebar width. `sideBarWidth` is the right-column width
   // (clamped to ≥220 by `normalizeSideBarWidth`); when `rightColumn` is empty
@@ -115,7 +119,14 @@ export const useLayoutStore = defineStore('layout', () => {
     DISPATCH_LAYOUT_MENU_ITEMS()
   }
 
-  function TOGGLE_LAYOUT_ENTRY(entryName: 'showSideBar' | 'showTabBar'): void {
+  function TOGGLE_LAYOUT_ENTRY(
+    entryName: 'showSideBar' | 'showTabBar' | 'showScreenplayPreview'
+  ): void {
+    if (entryName === 'showScreenplayPreview') {
+      showScreenplayPreview.value = !showScreenplayPreview.value
+      DISPATCH_LAYOUT_MENU_ITEMS()
+      return
+    }
     if (entryName === 'showSideBar') {
       showSideBar.value = !showSideBar.value
       const preferencesStore = usePreferencesStore()
@@ -157,7 +168,7 @@ export const useLayoutStore = defineStore('layout', () => {
     })
 
     window.electron.ipcRenderer.on('mt::toggle-view-layout-entry', (_e, entryName) => {
-      TOGGLE_LAYOUT_ENTRY(entryName as 'showSideBar' | 'showTabBar')
+      TOGGLE_LAYOUT_ENTRY(entryName as 'showSideBar' | 'showTabBar' | 'showScreenplayPreview')
       DISPATCH_LAYOUT_MENU_ITEMS()
     })
 
@@ -175,7 +186,8 @@ export const useLayoutStore = defineStore('layout', () => {
     const { windowId } = window.marktext?.env ?? {}
     window.electron.ipcRenderer.send('mt::view-layout-changed', Number(windowId), {
       showTabBar: showTabBar.value,
-      showSideBar: showSideBar.value
+      showSideBar: showSideBar.value,
+      showScreenplayPreview: showScreenplayPreview.value
     })
   }
 
@@ -188,6 +200,7 @@ export const useLayoutStore = defineStore('layout', () => {
     showSideBar,
     showTabBar,
     sideBarWidth,
+    showScreenplayPreview,
     effectiveSideBarWidth,
     SET_LAYOUT,
     CREATE_BUFFERED_STATE,

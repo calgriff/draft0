@@ -46,6 +46,22 @@ const tabId = ref<string | null>(null)
 const { theme, sourceCode } = storeToRefs(preferencesStore)
 const { currentFile: currentTab } = storeToRefs(editorStore)
 
+// `markdown-math` wraps the standard Markdown mode and delegates `$...$` and
+// `$$...$$` spans to stex so subscript underscores in math do not flip the
+// outer mode into emphasis. See src/renderer/src/codeMirror/markdownMathMode.ts.
+const modeForFile = (pathname?: string | null): string =>
+  pathname && window.fileUtils.isFountainFile(pathname) ? 'fountain' : 'markdown-math'
+
+// The source view is reused across tabs, so the mode has to follow the file.
+watch(
+  () => currentTab.value?.pathname,
+  (pathname) => {
+    if (editor.value) {
+      editor.value.setOption('mode', modeForFile(pathname))
+    }
+  }
+)
+
 const isValidMuyaIndexCursor = (cursor: unknown): cursor is MuyaIndexCursorLike => {
   const c = cursor as MuyaIndexCursorLike | null | undefined
   return !!(c && c.anchor && c.focus)
@@ -369,10 +385,7 @@ onMounted(() => {
   // See https://github.com/codemirror/codemirror5/issues/6886 - hence, we need to use a local variable first.
   const codeMirrorInstance = codeMirror(container, codeMirrorConfig)
 
-  // `markdown-math` wraps the standard Markdown mode and delegates `$...$` and
-  // `$$...$$` spans to stex so subscript underscores in math do not flip the
-  // outer mode into emphasis. See src/renderer/src/codeMirror/markdownMathMode.js.
-  codeMirrorInstance.setOption('mode', 'markdown-math')
+  codeMirrorInstance.setOption('mode', modeForFile(currentTab.value?.pathname))
 
   codeMirrorInstance.on('contextmenu', (_cm: CMInstance, event: Event) => {
     event.preventDefault()

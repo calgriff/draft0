@@ -19,8 +19,19 @@ export const MARKDOWN_EXTENSIONS: readonly string[] = Object.freeze([
   'txt'
 ])
 
+// Screenplay formats. Kept apart from MARKDOWN_EXTENSIONS because they are not
+// markdown: they open in source mode with their own syntax mode and preview,
+// while still being openable, watchable and listed in the file tree.
+export const SCRIPT_EXTENSIONS: readonly string[] = Object.freeze(['fountain'])
+
+/** Every extension the editor will open. */
+export const SUPPORTED_EXTENSIONS: readonly string[] = Object.freeze([
+  ...MARKDOWN_EXTENSIONS,
+  ...SCRIPT_EXTENSIONS
+])
+
 export const MARKDOWN_INCLUSIONS: readonly string[] = Object.freeze(
-  MARKDOWN_EXTENSIONS.map((x) => '*.' + x)
+  SUPPORTED_EXTENSIONS.map((x) => '*.' + x)
 )
 
 export const IMAGE_EXTENSIONS: readonly string[] = Object.freeze([
@@ -101,11 +112,23 @@ export const isDangerousExecutableFile = (filepath: string): boolean => {
 }
 
 /**
- * Returns true if the filename matches one of the markdown extensions.
+ * Returns true if the filename matches one of the extensions the editor opens.
+ *
+ * The name predates screenplay support and is kept because it is load-bearing
+ * across the main process, the preload bridge and the renderer; use
+ * {@link isFountainFile} when the distinction actually matters.
  */
 export const hasMarkdownExtension = (filename: string): boolean => {
   if (!filename || typeof filename !== 'string') return false
-  return MARKDOWN_EXTENSIONS.some((ext) => filename.toLowerCase().endsWith(`.${ext}`))
+  return SUPPORTED_EXTENSIONS.some((ext) => filename.toLowerCase().endsWith(`.${ext}`))
+}
+
+/**
+ * Returns true if the filename is a Fountain screenplay.
+ */
+export const isFountainFile = (filename: string): boolean => {
+  if (!filename || typeof filename !== 'string') return false
+  return SCRIPT_EXTENSIONS.some((ext) => filename.toLowerCase().endsWith(`.${ext}`))
 }
 
 /**

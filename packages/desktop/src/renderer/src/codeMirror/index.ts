@@ -10,6 +10,7 @@ import loadmode from './loadmode'
 import overlayMode from './overlayMode'
 import multiplexMode from './mltiplexMode'
 import registerMarkdownMathMode from './markdownMathMode'
+import registerFountainMode from './fountainMode'
 import languages from './modes'
 import 'codemirror/lib/codemirror.css'
 import './index.css'
@@ -41,6 +42,7 @@ loadmode(codeMirror)
 overlayMode(codeMirror)
 multiplexMode(codeMirror)
 registerMarkdownMathMode(codeMirror)
+registerFountainMode(codeMirror)
 ;(window as unknown as { CodeMirror: CodeMirrorLike }).CodeMirror = codeMirror
 
 const modes: ModeInfoEntry[] = codeMirror.modeInfo

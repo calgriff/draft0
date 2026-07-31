@@ -11,7 +11,12 @@ import {
 } from 'electron'
 import log from 'electron-log'
 import { isDirectory, isFile, exists } from 'common/filesystem'
-import { MARKDOWN_EXTENSIONS, isDangerousExecutableFile, isMarkdownFile } from 'common/filesystem/paths'
+import {
+  MARKDOWN_EXTENSIONS,
+  SCRIPT_EXTENSIONS,
+  isDangerousExecutableFile,
+  isMarkdownFile
+} from 'common/filesystem/paths'
 import { checkUpdates, userSetting } from './marktext'
 import { showTabBar } from './view'
 import { COMMANDS } from '../../commands'
@@ -731,6 +736,10 @@ export const openFile = async(win: BrowserWindow | null): Promise<void> => {
       {
         name: 'Markdown document',
         extensions: [...MARKDOWN_EXTENSIONS]
+      },
+      {
+        name: 'Screenplay',
+        extensions: [...SCRIPT_EXTENSIONS]
       }
     ]
   })

@@ -123,13 +123,19 @@ const MARKDOWN_EXTENSIONS = [
   'mdtext',
   'mdx',
   'text',
-  'txt'
+  'txt',
+  // Screenplay format — see SCRIPT_EXTENSIONS in common/filesystem/paths.ts,
+  // which this list must stay in sync with.
+  'fountain'
 ] as const
 
 const hasMarkdownExtension = (filename: string): boolean => {
   if (!filename || typeof filename !== 'string') return false
   return MARKDOWN_EXTENSIONS.some((ext) => filename.toLowerCase().endsWith(`.${ext}`))
 }
+
+const isFountainFile = (filename: string): boolean =>
+  typeof filename === 'string' && filename.toLowerCase().endsWith('.fountain')
 
 const isChildOfDirectory = (dir: string, child: string): boolean => {
   if (!dir || !child) return false
@@ -173,6 +179,7 @@ const fileUtilsAPI = {
   // Pure-string predicates — synchronous, no IPC for the common case.
   isChildOfDirectory,
   hasMarkdownExtension,
+  isFountainFile,
   isSamePathSync,
   // isImageFile needs an fs.statSync; keep it async via IPC.
   isImageFile: (p: string) => invoke('mt::paths::is-image', p),

@@ -59,6 +59,10 @@ export const toggleTabBar = (win: Win): void => {
   toggleLayout(win, 'showTabBar')
 }
 
+export const toggleScreenplayPreview = (win: Win): void => {
+  toggleLayout(win, 'showScreenplayPreview')
+}
+
 export const showTabBar = (win: Win): void => {
   setLayout(win, 'showTabBar', true)
 }
@@ -123,6 +127,9 @@ export const viewLayoutChanged = (
         break
       case 'showTabBar':
         changeMenuByName('tabBarMenuItem', value)
+        break
+      case 'showScreenplayPreview':
+        changeMenuByName('screenplayPreviewMenuItem', value)
         break
       case 'sourceCode':
         changeMenuByName('sourceCodeModeMenuItem', !!value)

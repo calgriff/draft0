@@ -113,6 +113,7 @@ declare global {
     isExecutable(p: string): Promise<boolean>
     isChildOfDirectory(dir: string, child: string): boolean
     hasMarkdownExtension(filename: string): boolean
+    isFountainFile(filename: string): boolean
     isSamePathSync(a: string, b: string, isNormalized?: boolean): boolean
     isImageFile(p: string): Promise<boolean>
     MARKDOWN_INCLUSIONS: string[]

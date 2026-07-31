@@ -69,6 +69,15 @@ export default function(keybindings: Keybindings): MenuItemConstructorOptions {
       }
     },
     {
+      label: t('menu.view.toggleScreenplayPreview'),
+      id: 'screenplayPreviewMenuItem',
+      type: 'checkbox',
+      checked: true,
+      click(_item, focusedWindow) {
+        actions.toggleScreenplayPreview(focusedWindow as BrowserWindow | undefined)
+      }
+    },
+    {
       label: t('menu.view.toggleTableOfContents'),
       id: 'tocMenuItem',
       accelerator: keybindings.getAccelerator('view.toggle-toc') ?? undefined,

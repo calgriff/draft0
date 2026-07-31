@@ -1,0 +1,146 @@
+/* Screenplay */
+
+/* Standard US screenplay layout: 12pt Courier on US Letter, 1" top/bottom,
+   1.5" left and 1" right margins, with dialogue and character cues indented to
+   the positions a reader (and any script-timing rule of thumb) expects — one
+   page ≈ one minute of screen time only holds if these measures are right. */
+
+.fountain-script {
+  box-sizing: border-box;
+  max-width: 6in;
+  margin: 0 auto;
+  padding: 0;
+
+  font-family: 'Courier Prime', 'Courier Final Draft', 'Courier New', Courier, monospace;
+  font-size: 12pt;
+  line-height: 1;
+  color: #000;
+  text-align: left;
+  white-space: normal;
+}
+
+.fountain-script p {
+  margin: 0 0 12pt;
+}
+
+.fountain-script .scene-heading {
+  position: relative;
+  margin: 24pt 0 12pt;
+  font-size: 12pt;
+  font-weight: bold;
+  text-transform: uppercase;
+  border: none;
+  padding: 0;
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+.fountain-script .scene-number {
+  position: absolute;
+  left: -0.75in;
+  font-weight: normal;
+}
+
+.fountain-script .action {
+  margin-bottom: 12pt;
+}
+
+.fountain-script .character {
+  margin: 12pt 0 0 2.2in;
+  text-transform: uppercase;
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+.fountain-script .parenthetical {
+  margin: 0 0 0 1.6in;
+  max-width: 2in;
+  break-before: avoid;
+  page-break-before: avoid;
+}
+
+.fountain-script .dialogue {
+  margin: 0 0 0 1in;
+  max-width: 3.5in;
+}
+
+/* Only the last line of a dialogue run needs the trailing gap; the run is a
+   sequence of sibling paragraphs, so key off what follows. */
+.fountain-script .dialogue + .character,
+.fountain-script .dialogue + .scene-heading,
+.fountain-script .dialogue + .action,
+.fountain-script .dialogue + .transition {
+  margin-top: 12pt;
+}
+
+.fountain-script .transition {
+  margin: 12pt 0;
+  text-align: right;
+  text-transform: uppercase;
+}
+
+.fountain-script .centered {
+  text-align: center;
+}
+
+.fountain-script .section {
+  margin: 18pt 0 6pt;
+  font-weight: bold;
+  color: #666;
+}
+
+.fountain-script .synopsis {
+  margin: 0 0 12pt;
+  font-style: italic;
+  color: #666;
+}
+
+.fountain-script .page-break {
+  break-after: page;
+  page-break-after: always;
+}
+
+.fountain-script .title-page {
+  min-height: 8in;
+  margin-bottom: 24pt;
+  text-align: center;
+  break-after: page;
+  page-break-after: always;
+}
+
+.fountain-script .title-page-title {
+  margin-top: 3in;
+  font-weight: bold;
+  text-transform: uppercase;
+  text-decoration: underline;
+}
+
+.fountain-script .title-page-credit,
+.fountain-script .title-page-author,
+.fountain-script .title-page-source {
+  margin: 0;
+}
+
+.fountain-script .title-page-credit {
+  margin-top: 12pt;
+}
+
+.fountain-script .title-page-meta {
+  margin: 0;
+  text-align: left;
+}
+
+.fountain-script .title-page-meta:first-of-type {
+  margin-top: 2in;
+}
+
+@media print {
+  @page {
+    size: letter;
+    margin: 1in 1in 1in 1.5in;
+  }
+
+  .fountain-script {
+    max-width: none;
+  }
+}
