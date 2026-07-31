@@ -144,6 +144,6 @@ input.rename {
   border: 1px solid var(--floatBorderColor);
   background: var(--floatBorderColor);
   width: 100%;
-  border-radius: 3px;
+  border-radius: var(--radiusSm);
 }
 </style>

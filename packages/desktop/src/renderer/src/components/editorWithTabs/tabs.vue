@@ -276,7 +276,9 @@ onBeforeUnmount(() => {
   flex-direction: row;
   height: 28px;
   user-select: none;
-  box-shadow: 0px 0px 9px 2px rgba(0, 0, 0, 0.1);
+  /* A hairline instead of the old drop shadow: the tab strip sits flush
+     against the editor, so a shadow reads as a seam that isn't there. */
+  border-bottom: 1px solid var(--floatBorderColor);
   overflow: hidden;
   &:hover > .new-file {
     opacity: 1 !important;
@@ -304,9 +306,10 @@ onBeforeUnmount(() => {
   & > li {
     transition: all 0.15s ease-in-out;
     position: relative;
-    padding: 0 8px;
+    padding: 0 10px;
     color: var(--editorColor50);
     font-size: 12px;
+    letter-spacing: -0.01em;
     line-height: 28px;
     height: 28px;
     max-width: 280px;
@@ -322,7 +325,8 @@ onBeforeUnmount(() => {
       outline: none;
     }
     &:hover {
-      background: var(--floatBgColor) !important;
+      color: var(--editorColor80);
+      background: var(--sideBarItemHoverBgColor) !important;
     }
     &:hover > .close-icon {
       opacity: 1;
@@ -361,6 +365,7 @@ onBeforeUnmount(() => {
   }
   & > li.active {
     background: var(--itemBgColor);
+    color: var(--editorColor80);
     z-index: 3;
     &:after {
       content: '';

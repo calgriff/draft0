@@ -102,7 +102,7 @@ const handleInput = (value: string) => {
 .pref-text-box-item {
   font-size: 14px;
   user-select: none;
-  margin: 12px 0;
+  margin: var(--space4) 0;
   color: var(--editorColor);
   width: 100%;
   & div {

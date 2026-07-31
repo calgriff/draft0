@@ -81,7 +81,7 @@ const select = (value: number | number[]) => {
 
 <style>
 .pref-range-item {
-  margin: 12px 0;
+  margin: var(--space4) 0;
   font-size: 14px;
   color: var(--editorColor);
   width: 100%;

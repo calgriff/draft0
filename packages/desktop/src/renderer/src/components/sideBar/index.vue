@@ -151,7 +151,7 @@ const handleLeftBottomClick = (name: string): void => {
   color: var(--sideBarColor);
   user-select: none;
   background: var(--sideBarBgColor);
-  border-right: 1px solid var(--itemBgColor);
+  border-right: 1px solid var(--floatBorderColor);
 }
 
 .side-bar .left-column svg {
@@ -189,6 +189,7 @@ const handleLeftBottomClick = (name: string): void => {
   justify-content: space-around;
   align-items: center;
   cursor: pointer;
+  position: relative;
 }
 
 .left-column ul > li > svg {
@@ -196,11 +197,31 @@ const handleLeftBottomClick = (name: string): void => {
   height: 18px;
   color: var(--sideBarIconColor);
   opacity: 1;
-  transition: transform 0.25s ease-in-out;
+  transition:
+    transform 0.25s ease-in-out,
+    color var(--transitionFast);
+}
+
+.left-column ul > li:hover > svg {
+  color: var(--editorColor80);
 }
 
 .left-column ul > li.active > svg {
   color: var(--themeColor);
+}
+
+/* Marks the active panel on the icon rail, which otherwise relies on icon
+   colour alone — too subtle at 18px in the low-contrast themes. */
+.left-column ul > li.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2px;
+  height: 20px;
+  border-radius: 0 var(--radiusSm) var(--radiusSm) 0;
+  background: var(--themeColor);
 }
 
 .side-bar:hover .left-column ul li svg {

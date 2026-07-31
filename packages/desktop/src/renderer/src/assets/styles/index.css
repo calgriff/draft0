@@ -1,7 +1,43 @@
 /* Common CSS use by both light and dark themes */
+
+/* IBM Plex Mono — the draft0 wordmark face, bundled under the SIL Open Font
+   License (see assets/fonts/IBMPlexMono-LICENSE.txt). Also selectable as an
+   editor or code font. */
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/IBMPlexMono-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../fonts/IBMPlexMono-SemiBold.woff2') format('woff2');
+}
+
 :root {
   --titleBarHeight: 32px;
   --editorAreaWidth: 750px;
+
+  /* Chrome design tokens. Additive: the 35 theme files override colours only,
+     so they stay valid without touching any of them. Shape and spacing are
+     deliberately theme-independent — a theme changes the palette, not the
+     geometry of the interface. */
+  --radiusSm: 4px;
+  --radiusMd: 6px;
+  --radiusLg: 10px;
+  --space1: 4px;
+  --space2: 8px;
+  --space3: 12px;
+  --space4: 16px;
+  --space5: 24px;
+  --shadowSm: 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadowMd: 0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --transitionFast: 120ms ease;
 
   /*editor*/
   /*Theme color cluster*/
@@ -213,21 +249,33 @@ body {
 
 .el-dialog,
 .el-dialog.ag-dialog-table {
-  border-radius: 8px;
-  box-shadow: 0 4px 8px 0 var(--floatBorderColor);
+  border-radius: var(--radiusLg);
+  box-shadow: var(--shadowMd);
   border: solid 1px var(--floatBorderColor);
   background-color: var(--floatBgColor);
 }
 .el-dialog__header {
   position: relative;
   display: block;
-  padding: 8px 6px;
+  padding: var(--space2) var(--space1);
+}
+
+.el-dialog h3 {
+  margin: var(--space2) 0 var(--space4);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--editorColor80);
 }
 
 input.el-input__inner {
   background: var(--inputBgColor);
   border: 1px solid var(--editorColor10);
   color: var(--editorColor80);
+}
+
+.el-input__wrapper {
+  border-radius: var(--radiusSm);
 }
 
 .el-input.is-focus .el-input__wrapper,
@@ -278,9 +326,14 @@ div.el-tab-pane {
   color: var(--buttonFontColor);
   background: var(--buttonBgColor);
   border: var(--buttonBorder);
-  border-radius: 5px;
+  border-radius: var(--radiusMd);
   box-shadow: var(--buttonShadow);
-  padding: 7px 14px;
+  padding: 6px 14px;
+  font-weight: 500;
+  transition:
+    background var(--transitionFast),
+    border-color var(--transitionFast),
+    color var(--transitionFast);
 }
 .button:hover,
 .muya-button:hover,
@@ -311,9 +364,14 @@ div.el-tab-pane {
   color: var(--buttonPrimaryFontColor);
   background: var(--buttonPrimaryBgColor);
   border: var(--buttonPrimaryBorder);
-  border-radius: 5px;
+  border-radius: var(--radiusMd);
   box-shadow: var(--buttonPrimaryShadow);
-  padding: 7px 14px;
+  padding: 6px 14px;
+  font-weight: 500;
+  transition:
+    background var(--transitionFast),
+    border-color var(--transitionFast),
+    color var(--transitionFast);
 }
 .button-primary:hover,
 .muya-button-primary:hover,
@@ -396,7 +454,20 @@ button.button-primary:not(.custom):focus,
 /* Overwrite element UI button padding */
 .el-button,
 .el-button--primary {
-  padding: 7px 14px;
+  padding: 6px 14px;
+}
+
+/* Keyboard focus stays visible everywhere in the chrome; `:focus` alone is
+   suppressed globally by the `:focus { outline: none }` rule above, which
+   leaves keyboard users with nothing to follow. */
+.side-bar :focus-visible,
+.title-bar :focus-visible,
+.editor-tabs :focus-visible,
+.el-dialog :focus-visible,
+.pref-sidebar :focus-visible {
+  outline: 2px solid var(--themeColor);
+  outline-offset: 2px;
+  border-radius: var(--radiusSm);
 }
 .el-button:focus {
   background-color: var(--buttonBgColor);

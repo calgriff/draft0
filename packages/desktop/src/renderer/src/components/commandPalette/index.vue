@@ -363,15 +363,15 @@ onBeforeUnmount(() => {
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  padding: 8px;
+  padding: var(--space2);
   margin: 0 auto;
-  margin-top: 8px;
+  margin-top: var(--space3);
   box-sizing: border-box;
   color: var(--editorColor);
   background: var(--floatBgColor);
   border: 1px solid var(--floatBorderColor);
-  border-radius: 4px;
-  box-shadow: 0 3px 8px 3px var(--floatShadow);
+  border-radius: var(--radiusLg);
+  box-shadow: var(--shadowMd);
   z-index: 10000;
 }
 .input-wrapper {
@@ -379,7 +379,7 @@ onBeforeUnmount(() => {
   width: 100%;
   border: 1px solid var(--inputBgColor);
   background: var(--inputBgColor);
-  border-radius: 3px;
+  border-radius: var(--radiusMd);
 }
 input.search {
   width: 100%;
@@ -421,18 +421,21 @@ ul.commands li {
   align-items: center;
   max-width: 100%;
   height: 35px;
-  padding: 0 8px;
+  padding: 0 var(--space3);
   font-size: 14px;
   line-height: 35px;
   text-overflow: ellipsis;
   cursor: pointer;
+  border-radius: var(--radiusMd);
+  transition: background var(--transitionFast);
 }
 ul.commands li:hover {
   background: var(--floatHoverColor);
-  opacity: 0.9;
 }
+/* The keyboard-selected row has to outrank hover, or moving the mouse over the
+   list makes it ambiguous which row Enter will run. */
 ul.commands li.active {
-  background: var(--floatHoverColor);
+  background: var(--themeColor20);
 }
 ul.commands li span {
   text-overflow: ellipsis;
@@ -455,7 +458,7 @@ ul.commands li span.shortcut > kbd {
   color: var(--editorColor);
   background: var(--floatBgColor);
   border: 1px solid var(--floatBorderColor);
-  border-radius: 4px;
+  border-radius: var(--radiusSm);
 }
 
 .fade-enter-active,

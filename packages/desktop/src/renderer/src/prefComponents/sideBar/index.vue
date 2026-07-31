@@ -169,8 +169,9 @@ onUnmounted(() => {
   box-sizing: border-box;
   & h3 {
     margin: 0;
-    font-size: 20px;
-    font-weight: normal;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
     text-align: center;
     color: var(--sideBarColor);
   }
@@ -231,9 +232,14 @@ onUnmounted(() => {
   & .item {
     width: 100%;
     height: 38px;
-    font-size: 16px;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
     color: var(--sideBarColor);
     padding-left: 16px;
+    transition:
+      background var(--transitionFast),
+      color var(--transitionFast);
     box-sizing: border-box;
     display: flex;
     flex-direction: row;
