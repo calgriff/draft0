@@ -60,7 +60,10 @@
 
 .fountain-script .parenthetical {
   margin: 0 0 0 16ch;
-  max-width: 21ch;
+  /* Wider than the ~20ch the printed format strictly allows, so an ordinary
+     parenthetical like "(to no one in particular)" stays on one line instead
+     of breaking after "in". Still visibly narrower than dialogue. */
+  max-width: 26ch;
   break-before: avoid;
   page-break-before: avoid;
 }

@@ -2223,7 +2223,11 @@ onBeforeUnmount(() => {
   height: 100%;
   overflow: auto;
   box-sizing: border-box;
-  cursor: default;
+  /* An I-beam over editable text. muya sets `cursor: text` on headings only,
+     so everything else inherited the arrow from here — including ordinary
+     paragraphs and the click-target padding below the document. Links, images
+     and the block handles set their own cursor and are unaffected. */
+  cursor: text;
   overflow-anchor: none !important;
 }
 
