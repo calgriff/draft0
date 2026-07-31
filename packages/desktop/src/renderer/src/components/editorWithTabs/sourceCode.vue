@@ -214,6 +214,17 @@ const handleFileChange = (payload: unknown) => {
   }
 }
 
+/**
+ * A freshly created or opened document should be ready to type into. Mounting
+ * handles the case where this view is new (CodeMirror autofocuses), but when it
+ * is already mounted — creating a second screenplay from a screenplay — nothing
+ * would take focus otherwise.
+ */
+const handleFileLoaded = (payload: unknown) => {
+  handleFileChange(payload)
+  editor.value?.focus()
+}
+
 const handleInvalidateImageCache = () => {
   if (editor.value) {
     editor.value.invalidateImageCache()
@@ -393,7 +404,7 @@ onMounted(() => {
     codeMirrorConfig.theme = 'one-dark'
   }
 
-  bus.on('file-loaded', handleFileChange)
+  bus.on('file-loaded', handleFileLoaded)
   bus.on('invalidate-image-cache', handleInvalidateImageCache)
   bus.on('file-changed', handleFileChange)
   bus.on('selectAll', handleSelectAll)
@@ -430,7 +441,7 @@ onBeforeUnmount(() => {
   viewDestroyed.value = true
   if (commitTimer.value) clearTimeout(commitTimer.value)
 
-  bus.off('file-loaded', handleFileChange)
+  bus.off('file-loaded', handleFileLoaded)
   bus.off('invalidate-image-cache', handleInvalidateImageCache)
   bus.off('file-changed', handleFileChange)
   bus.off('selectAll', handleSelectAll)

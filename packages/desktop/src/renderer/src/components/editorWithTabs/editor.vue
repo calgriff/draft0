@@ -1780,6 +1780,7 @@ const flushActiveEditor = () => {
 }
 
 const focusEditor = () => {
+  if (inSourceView.value) return
   editor.value?.focus()
 }
 
@@ -1792,9 +1793,14 @@ const focusEditor = () => {
 // range — the contenteditable also needs focus or no caret blinks) and place
 // the caret at the document start.
 const focusFreshEditor = () => {
+  // Not while the source editor is the visible one. CodeMirror takes focus on
+  // mount, but this runs a frame later and would take it back — sending every
+  // keystroke into the hidden engine, where the text is invisible even though
+  // the document (and so the preview) updates.
+  if (inSourceView.value) return
   requestAnimationFrame(() => {
     const ed = editor.value
-    if (!ed) return
+    if (!ed || inSourceView.value) return
     ed.domNode.focus()
     ed.focus()
   })
