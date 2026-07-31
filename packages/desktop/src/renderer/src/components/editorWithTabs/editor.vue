@@ -96,6 +96,7 @@ import {
   FootnoteTool,
   ImageEditTool,
   ImagePathPicker,
+  ImageCropBar,
   ImageResizeBar,
   ImageToolBar,
   InlineFormatToolbar,
@@ -119,7 +120,8 @@ import {
   tr,
   zhCN,
   zhTW,
-  type ILocale
+  type ILocale,
+  type ICropRect
 } from '@muyajs/core'
 import { exportStyledHTML, type HeaderFooterPart } from '@/util/exportHtml'
 import { applyCursor, isIndexCursor } from '@/util/cursor'
@@ -1042,7 +1044,7 @@ const CROP_MIME_BY_EXT: Record<string, string> = {
  * showing the pre-crop image from cache — the image loader and the file
  * loader both ignore the query.
  */
-const imageCropAction = async (src: string): Promise<string | null> => {
+const imageCropAction = async (src: string, rect: ICropRect): Promise<string | null> => {
   const warn = (message: string) => {
     notice.notify({ title: t('imageCrop.title'), type: 'warning', message })
   }
@@ -1087,9 +1089,34 @@ const imageCropAction = async (src: string): Promise<string | null> => {
 
   let blob: Blob | null = null
   try {
+    const bitmap = await createImageBitmap(await (await fetch(objectUrl)).blob())
+    const canvas = document.createElement('canvas')
+    // Crop at the image's own resolution: the frame was drawn over a scaled
+    // copy, but `rect` is expressed in fractions precisely so that scale does
+    // not have to survive the round trip.
+    canvas.width = Math.max(1, Math.round(bitmap.width * rect.width))
+    canvas.height = Math.max(1, Math.round(bitmap.height * rect.height))
+    const context = canvas.getContext('2d')
+    if (!context) return null
+    context.drawImage(
+      bitmap,
+      Math.round(bitmap.width * rect.x),
+      Math.round(bitmap.height * rect.y),
+      canvas.width,
+      canvas.height,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    )
+    bitmap.close()
     blob = await new Promise<Blob | null>((resolve) => {
-      bus.emit('showImageCropDialog', { displaySrc: objectUrl, mime, resolve })
+      canvas.toBlob(resolve, mime, mime === 'image/jpeg' ? 0.92 : undefined)
     })
+  } catch (err) {
+    log.error('Failed to crop image:', err)
+    warn(t('imageCrop.failed'))
+    return null
   } finally {
     URL.revokeObjectURL(objectUrl)
   }
@@ -1899,6 +1926,7 @@ onMounted(() => {
       imagePathPicker,
       imagePathAutoComplete
     })
+    Muya.use(ImageCropBar)
     Muya.use(ImageResizeBar)
     Muya.use(ImageToolBar)
     Muya.use(InlineFormatToolbar)

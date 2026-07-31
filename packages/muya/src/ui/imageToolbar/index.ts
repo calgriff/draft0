@@ -30,6 +30,8 @@ export class ImageToolBar extends BaseFloat {
 
     private _icons: Icon[] = icons;
     private _reference: ReferenceElement | null = null;
+    /** The picture itself, for the crop overlay to sit on top of. */
+    private _imageElement: HTMLElement | null = null;
     private _block: Format | null = null;
     private _toolbarContainer: HTMLDivElement = document.createElement('div');
 
@@ -48,11 +50,12 @@ export class ImageToolBar extends BaseFloat {
     override listen() {
         const { eventCenter } = this.muya;
         super.listen();
-        eventCenter.on('muya-image-toolbar', ({ block, reference, imageInfo }) => {
+        eventCenter.on('muya-image-toolbar', ({ block, reference, imageInfo, container }) => {
             this._reference = reference;
             if (reference) {
                 this._block = block;
                 this._imageInfo = imageInfo;
+                this._imageElement = container ?? null;
                 setTimeout(() => {
                     this.show(reference);
                     this._render();
@@ -188,28 +191,18 @@ export class ImageToolBar extends BaseFloat {
             }
 
             case 'crop': {
-                const block = this._block!;
-                const src = this._imageSrc();
-                // Hide image resize bar
-                this.muya.eventCenter.emit('muya-transformer', {
-                    reference: null,
-                });
+                const { eventCenter } = this.muya;
+                // Hand off to the crop overlay, which draws a frame on the
+                // picture itself. Both the resize bar and this toolbar get out
+                // of its way first.
+                eventCenter.emit('muya-transformer', { reference: null });
+                const payload = {
+                    block: this._block,
+                    reference: this._imageElement,
+                    imageInfo,
+                };
                 this.hide();
-
-                this.muya.options
-                    .imageCropAction!(src)
-                    .then((newSrc) => {
-                        // A null result means the user cancelled; an unchanged
-                        // src means the crop overwrote the file in place, and
-                        // the image element still has to be re-fetched.
-                        if (newSrc == null)
-                            return;
-
-                        block.updateImage(imageInfo!, 'src', newSrc);
-                    })
-                    .catch((err) => {
-                        console.error('Failed to crop image:', err);
-                    });
+                eventCenter.emit('muya-image-crop-bar', payload);
 
                 return;
             }

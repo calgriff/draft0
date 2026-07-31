@@ -79,15 +79,17 @@ export interface IMuyaOptions {
      */
     imageAction?: (state: IImageActionState) => Promise<string>;
     /**
-     * Crop a local image and resolve to the src that should replace it, or
-     * `null` if the user cancelled.
+     * Write a cropped copy of a local image and resolve to the src that should
+     * replace it, or `null` if it could not be written.
      *
-     * The embedder owns the crop UI and the write to disk; muya only rewrites
-     * the `src` attribute with whatever comes back. Omitting the hook removes
-     * the crop button from the image toolbar, which is also hidden for remote
-     * and SVG images since neither can be cropped meaningfully.
+     * `rect` is the area to keep, as fractions of the image, so the embedder
+     * needs to know nothing about how large it was drawn on screen. muya owns
+     * the crop frame and only rewrites the `src` attribute with whatever comes
+     * back. Omitting the hook removes the crop button from the image toolbar,
+     * which is also hidden for remote and SVG images since neither can be
+     * cropped meaningfully.
      */
-    imageCropAction?: (src: string) => Promise<string | null>;
+    imageCropAction?: (src: string, rect: ICropRect) => Promise<string | null>;
     /**
      * Resolve a dropped `File` to a local filesystem path.
      *
@@ -103,6 +105,18 @@ export interface IMuyaOptions {
  * Image descriptor passed to {@link IMuyaOptions.imageAction}. Mirrors the
  * `{ src, alt, title }` shape used by the image-edit toolbar.
  */
+/**
+ * Area of an image to keep, as fractions of its width and height. Fractions
+ * rather than pixels so the embedder needs to know nothing about the scale the
+ * image happened to be displayed at.
+ */
+export interface ICropRect {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
+
 export interface IImageActionState {
     /** Image source — an absolute local path or a `data:` URL for a bitmap. */
     src: string;

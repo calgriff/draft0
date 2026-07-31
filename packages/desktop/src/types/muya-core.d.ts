@@ -57,8 +57,17 @@ declare module '@muyajs/core' {
   export const FootnoteTool: any
   export const ImageEditTool: any
   export const ImagePathPicker: any
+  export const ImageCropBar: any
   export const ImageResizeBar: any
   export const ImageToolBar: any
+
+  /** Area of an image to keep, as fractions of its width and height. */
+  export interface ICropRect {
+    x: number
+    y: number
+    width: number
+    height: number
+  }
   export const InlineFormatToolbar: any
   export const LinkTools: any
   export const ParagraphFrontButton: any

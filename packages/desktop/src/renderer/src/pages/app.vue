@@ -32,7 +32,6 @@
       <about-dialog />
       <export-setting-dialog />
       <rename />
-      <image-crop-dialog />
       <import-modal />
     </div>
   </div>
@@ -51,7 +50,6 @@ import AboutDialog from '@/components/about/index.vue'
 import CommandPalette from '@/components/commandPalette/index.vue'
 import ExportSettingDialog from '@/components/exportSettings/index.vue'
 import Rename from '@/components/rename/index.vue'
-import ImageCropDialog from '@/components/imageCrop/index.vue'
 import ImportModal from '@/components/import/index.vue'
 import bus from '@/bus'
 import { DEFAULT_STYLE } from '@/config'

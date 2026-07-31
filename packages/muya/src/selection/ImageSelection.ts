@@ -134,12 +134,6 @@ class ImageSelection {
                 height: imageWrapper.offsetHeight,
             };
 
-            eventCenter.emit('muya-image-toolbar', {
-                block: contentBlock,
-                reference,
-                imageInfo,
-            });
-
             // Resolve the image container from the clicked wrapper directly.
             // Images that share the same src (and paragraph offset) render with
             // duplicate DOM ids, so a `document.querySelector('#id ...')` lookup
@@ -148,6 +142,15 @@ class ImageSelection {
             const imageContainer = imageWrapper.querySelector(
                 `.${CLASS_NAMES.MU_IMAGE_CONTAINER}`,
             );
+
+            eventCenter.emit('muya-image-toolbar', {
+                block: contentBlock,
+                reference,
+                imageInfo,
+                // The element itself, for tools that overlay the picture rather
+                // than float beside it.
+                container: imageContainer,
+            });
 
             eventCenter.emit('muya-transformer', {
                 block: contentBlock,

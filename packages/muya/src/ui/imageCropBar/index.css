@@ -1,0 +1,101 @@
+.mu-image-crop,
+.mu-image-crop-actions {
+    position: absolute;
+    z-index: 20;
+}
+
+/* Dims the four regions outside the crop frame, so the kept area reads as the
+   only lit part of the picture. */
+.mu-image-crop .shade {
+    position: absolute;
+
+    background: rgb(0 0 0 / 45%);
+}
+
+.mu-image-crop .frame {
+    position: absolute;
+
+    box-sizing: border-box;
+
+    border: 1px solid var(--theme-color);
+
+    cursor: move;
+}
+
+.mu-image-crop .handle {
+    position: absolute;
+
+    box-sizing: border-box;
+    width: 12px;
+    height: 12px;
+
+    background: var(--theme-color);
+    border: 2px solid var(--editor-bg-color);
+    border-radius: 2px;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 25%);
+}
+
+.mu-image-crop .handle.nw {
+    cursor: nwse-resize;
+}
+.mu-image-crop .handle.ne {
+    cursor: nesw-resize;
+}
+.mu-image-crop .handle.sw {
+    cursor: nesw-resize;
+}
+.mu-image-crop .handle.se {
+    cursor: nwse-resize;
+}
+.mu-image-crop .handle.n {
+    cursor: ns-resize;
+}
+.mu-image-crop .handle.s {
+    cursor: ns-resize;
+}
+.mu-image-crop .handle.w {
+    cursor: ew-resize;
+}
+.mu-image-crop .handle.e {
+    cursor: ew-resize;
+}
+
+.mu-image-crop-actions {
+    display: flex;
+    gap: 6px;
+
+    padding: 4px;
+
+    background: var(--float-bg-color);
+    border: 1px solid var(--float-border-color);
+    border-radius: 4px;
+    box-shadow: 0 2px 8px 0 rgb(0 0 0 / 15%);
+}
+
+.mu-image-crop-actions button {
+    padding: 3px 10px;
+
+    color: var(--editor-color);
+    font-size: 12px;
+    font-family: inherit;
+
+    background: transparent;
+    border: none;
+    border-radius: 3px;
+
+    cursor: pointer;
+}
+
+.mu-image-crop-actions button:hover {
+    background: var(--float-hover-color);
+}
+
+.mu-image-crop-actions button.primary {
+    color: #fff;
+
+    background: var(--theme-color);
+}
+
+.mu-image-crop-actions button.primary:hover {
+    opacity: 0.9;
+}
