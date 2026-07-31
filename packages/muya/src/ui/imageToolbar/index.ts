@@ -73,9 +73,20 @@ export class ImageToolBar extends BaseFloat {
         if (!this.muya.options.imageCropAction)
             return false;
 
-        const src = this._imageInfo?.token.attrs.src ?? '';
+        const src = this._imageSrc();
 
         return !!src && !/^(?:https?|data):/i.test(src) && !/\.svg(?:[?#].*)?$/i.test(src);
+    }
+
+    /**
+     * Markdown-syntax images (`![](path)`) carry their source on the token,
+     * raw `<img>` tags carry it in the attributes. Reading only one of the two
+     * silently misses half the images in a document.
+     */
+    private _imageSrc(): string {
+        const token = this._imageInfo?.token;
+
+        return token?.src || token?.attrs?.src || '';
     }
 
     private _render() {
@@ -178,7 +189,7 @@ export class ImageToolBar extends BaseFloat {
 
             case 'crop': {
                 const block = this._block!;
-                const src = imageInfo!.token.attrs.src ?? '';
+                const src = this._imageSrc();
                 // Hide image resize bar
                 this.muya.eventCenter.emit('muya-transformer', {
                     reference: null,
