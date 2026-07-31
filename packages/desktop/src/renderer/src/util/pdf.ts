@@ -5,11 +5,31 @@
 // (#4412), this module derives its slugs from the SAME `generateGithubSlug`
 // algorithm, with the SAME `-N` document-order dedup the engine uses, so the
 // in-document TOC links resolve.
-import { escapeHTML, unescapeHTML, generateGithubSlug } from '@muyajs/core'
+import { generateGithubSlug } from '@muyajs/core'
 import academicTheme from '@/assets/themes/export/academic.theme.css?inline'
 import liberTheme from '@/assets/themes/export/liber.theme.css?inline'
 import { deepClone } from '../util'
 import { sanitize, EXPORT_DOMPURIFY_CONFIG } from '../util/dompurify'
+import { getCurrentThemeExportCss } from './exportCurrentTheme'
+
+/** Export-theme value that means "whatever the editor looks like right now". */
+export const CURRENT_THEME_VALUE = 'currentTheme'
+
+/**
+ * Neutralise the ways a stylesheet can break out of the `<style>` block it is
+ * embedded in, or pull in remote resources, without altering valid CSS.
+ *
+ * Only user-supplied theme files go through this. Running the whole generated
+ * stylesheet through DOMPurify (as this module used to) silently corrupted
+ * legitimate declarations, because an HTML sanitizer has no notion of CSS.
+ */
+const sanitizeUserCss = (css: string): string =>
+  css
+    .replace(/<\/\s*style/gi, '')
+    .replace(/<!--|-->/g, '')
+    .replace(/@import[^;]*;?/gi, '')
+    .replace(/expression\s*\(/gi, '(')
+    .replace(/url\(\s*(['"]?)\s*javascript:/gi, 'url($1')
 
 export interface PdfCssOptions {
   type?: string
@@ -23,6 +43,7 @@ export interface PdfCssOptions {
   autoNumberingHeadings?: boolean
   showFrontMatter?: boolean
   theme?: string
+  keepDarkBackground?: boolean
   headerFooterFontSize?: number
   [key: string]: unknown
 }
@@ -64,7 +85,9 @@ export const getCssForOptions = async(options: PdfCssOptions): Promise<string> =
   }
 
   if (theme) {
-    if (theme === 'academic') {
+    if (theme === CURRENT_THEME_VALUE) {
+      output += getCurrentThemeExportCss({ keepDarkBackground: options.keepDarkBackground })
+    } else if (theme === 'academic') {
       output += academicTheme
     } else if (theme === 'liber') {
       output += liberTheme
@@ -77,8 +100,8 @@ export const getCssForOptions = async(options: PdfCssOptions): Promise<string> =
           const buf = await window.fileUtils.readFile(themePath)
           const themeCSS =
             buf instanceof Uint8Array ? new TextDecoder('utf-8').decode(buf) : String(buf)
-          output += themeCSS
-        } catch (_) {
+          output += sanitizeUserCss(themeCSS)
+        } catch {
           // No-op
         }
       }
@@ -114,7 +137,7 @@ export const getCssForOptions = async(options: PdfCssOptions): Promise<string> =
     // Close @page
     output += '}'
   }
-  return unescapeHTML(sanitize(escapeHTML(output), EXPORT_DOMPURIFY_CONFIG))
+  return output
 }
 
 export interface TocEntry {

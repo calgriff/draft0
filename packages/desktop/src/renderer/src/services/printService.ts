@@ -23,6 +23,7 @@ class MarkdownPrint {
     }
     this.container = printContainer
     printContainer.innerHTML = html
+    this.confinePrintStylesToPrintMedia(printContainer)
 
     // Fix images when rendering for static files like PDF (GH#678).
     if (renderStatic) {
@@ -38,11 +39,30 @@ class MarkdownPrint {
   }
 
   /**
+   * The exported document is a standalone page, so its `<style>` blocks are
+   * written for a document where nothing else exists. Appending the container
+   * to `document.body` makes those styles global, and they restyle the visible
+   * editor for as long as the export runs — a theme-derived stylesheet even
+   * repaints `html`. Wrapping each block in `@media print` keeps it inert on
+   * screen while still applying to `printToPDF` and `webContents.print`, which
+   * both render in the print medium.
+   */
+  private confinePrintStylesToPrintMedia(container: HTMLElement): void {
+    for (const style of Array.from(container.querySelectorAll('style'))) {
+      const css = style.textContent
+      if (css) {
+        style.textContent = `@media print {\n${css}\n}`
+      }
+    }
+  }
+
+  /**
    * Remove the print container from the window.
    */
   clearup(): void {
     if (this.container) {
       this.container.remove()
+      this.container = null
     }
   }
 }

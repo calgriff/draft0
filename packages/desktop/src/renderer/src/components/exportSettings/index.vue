@@ -168,6 +168,13 @@
             :options="themeList"
             :on-change="(value: unknown) => onSelectChange('theme', value)"
           />
+          <bool
+            v-if="theme === 'currentTheme'"
+            :description="t('exportSettings.theme.keepDarkBackground')"
+            :detailed-description="t('exportSettings.theme.keepDarkBackgroundDetail')"
+            :bool="keepDarkBackground"
+            :on-change="(value: unknown) => onSelectChange('keepDarkBackground', value)"
+          />
         </el-tab-pane>
         <el-tab-pane
           v-if="isPrintable"
@@ -302,7 +309,6 @@ import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 
 const exportType = ref('')
-const themesLoaded = ref(false)
 const isPrintable = ref(true)
 const showExportSettingsDialog = ref(false)
 const activeName = ref('info')
@@ -322,7 +328,11 @@ const lineHeight = ref(1.5)
 const autoNumberingHeadings = ref(false)
 const showFrontMatter = ref(false)
 const theme = ref('default')
+const keepDarkBackground = ref(false)
 const themeList = ref(getExportThemeList())
+// Themes discovered under <userData>/themes/export, kept separately so a
+// locale change (which rebuilds the built-in list) doesn't drop them.
+const diskThemes = ref<{ value: string; label: string }[]>([])
 const pageSizeList = ref(getPageSizeList())
 const headerFooterTypes = ref(getHeaderFooterTypes())
 const headerType = ref(0)
@@ -358,6 +368,7 @@ const persistableSettings: Record<string, Ref<unknown>> = {
   autoNumberingHeadings,
   showFrontMatter,
   theme,
+  keepDarkBackground,
   headerType,
   headerTextLeft,
   headerTextCenter,
@@ -400,7 +411,7 @@ onBeforeUnmount(() => {
 })
 
 const updateTranslations = () => {
-  themeList.value = getExportThemeList()
+  applyThemeList()
   pageSizeList.value = getPageSizeList()
   headerFooterTypes.value = getHeaderFooterTypes()
 }
@@ -416,10 +427,9 @@ const showDialog = (type: unknown) => {
   showExportSettingsDialog.value = true
   bus.emit('editor-blur')
 
-  if (!themesLoaded.value) {
-    themesLoaded.value = true
-    loadThemesFromDisk()
-  }
+  // Re-scan on every open so a theme file dropped in while the app is running
+  // shows up without a restart.
+  loadThemesFromDisk()
 }
 
 const handleClicked = () => {
@@ -436,6 +446,7 @@ const handleClicked = () => {
     autoNumberingHeadings: autoNumberingHeadings.value,
     showFrontMatter: showFrontMatter.value,
     theme: theme.value === 'default' ? null : theme.value,
+    keepDarkBackground: keepDarkBackground.value,
     tocTitle: tocTitle.value,
     tocIncludeTopHeading: tocIncludeTopHeading.value
   }
@@ -497,6 +508,7 @@ const onSelectChange = (key: string, value: unknown) => {
     autoNumberingHeadings,
     showFrontMatter,
     theme,
+    keepDarkBackground,
     headerType,
     headerTextLeft,
     headerTextCenter,
@@ -516,6 +528,10 @@ const onSelectChange = (key: string, value: unknown) => {
   }
 }
 
+const applyThemeList = () => {
+  themeList.value = [...getExportThemeList(), ...diskThemes.value]
+}
+
 const loadThemesFromDisk = async () => {
   // marktext.paths is attached to `window` at runtime by bootstrap.ts but
   // isn't part of the typed contextBridge surface. Cast through `unknown`.
@@ -533,6 +549,7 @@ const loadThemesFromDisk = async () => {
     return
   }
 
+  const found: { value: string; label: string }[] = []
   for (const filename of filenames) {
     const fullname = window.path.join(themeDir, filename)
     if (!/.+\.css$/i.test(filename)) continue
@@ -542,11 +559,14 @@ const loadThemesFromDisk = async () => {
       const content = buf instanceof Uint8Array ? new TextDecoder('utf-8').decode(buf) : String(buf)
       const match = content.match(/^(?:\/\*+[ \t]*([A-z0-9 -]+)[ \t]*(?:\*+\/|[\n\r])?)/)
       const label = match && match[1] ? match[1] : filename
-      themeList.value.push({ value: filename, label })
+      found.push({ value: filename, label })
     } catch (e) {
       console.error('loadThemesFromDisk failed:', e)
     }
   }
+
+  diskThemes.value = found
+  applyThemeList()
 }
 </script>
 

@@ -24,7 +24,6 @@ export interface HeaderFooterPart {
 
 export interface ExportStyledHtmlOptions {
   title?: string
-  printOptimization?: boolean
   extraCss?: string
   /** Pre-rendered TOC HTML (from `getHtmlToc`). Injected at `[TOC]`. */
   toc?: string
