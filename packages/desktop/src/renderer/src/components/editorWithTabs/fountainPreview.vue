@@ -43,6 +43,13 @@ const html = computed(() => fountainToHtml(props.markdown ?? ''))
   color: var(--editorColor);
 }
 
+/* Screenplays are single-spaced on paper, which is right for the PDF but tight
+   to read on a screen. Loosen it here only — the exported document keeps the
+   standard measure. */
+.fountain-preview .fountain-script {
+  line-height: 1.3;
+}
+
 .fountain-preview .fountain-script .section,
 .fountain-preview .fountain-script .synopsis {
   color: var(--editorColor50);

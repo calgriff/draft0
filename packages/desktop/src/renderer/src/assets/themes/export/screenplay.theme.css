@@ -3,11 +3,17 @@
 /* Standard US screenplay layout: 12pt Courier on US Letter, 1" top/bottom,
    1.5" left and 1" right margins, with dialogue and character cues indented to
    the positions a reader (and any script-timing rule of thumb) expects — one
-   page ≈ one minute of screen time only holds if these measures are right. */
+   page ≈ one minute of screen time only holds if these measures are right.
+
+   Measures are in `ch`, not inches. The format is defined in characters of
+   10-pitch Courier (dialogue 35 wide, cue indented 22, and so on); at 12pt
+   those are the same thing, but `ch` stays exact whatever the installed
+   Courier''s metrics turn out to be, and scales with the font size instead of
+   wrapping early. */
 
 .fountain-script {
   box-sizing: border-box;
-  max-width: 6in;
+  max-width: 60ch;
   margin: 0 auto;
   padding: 0;
 
@@ -37,7 +43,7 @@
 
 .fountain-script .scene-number {
   position: absolute;
-  left: -0.75in;
+  left: -8ch;
   font-weight: normal;
 }
 
@@ -46,22 +52,22 @@
 }
 
 .fountain-script .character {
-  margin: 12pt 0 0 2.2in;
+  margin: 12pt 0 0 22ch;
   text-transform: uppercase;
   break-after: avoid;
   page-break-after: avoid;
 }
 
 .fountain-script .parenthetical {
-  margin: 0 0 0 1.6in;
-  max-width: 2in;
+  margin: 0 0 0 16ch;
+  max-width: 21ch;
   break-before: avoid;
   page-break-before: avoid;
 }
 
 .fountain-script .dialogue {
-  margin: 0 0 0 1in;
-  max-width: 3.5in;
+  margin: 0 0 0 10ch;
+  max-width: 35ch;
 }
 
 /* Only the last line of a dialogue run needs the trailing gap; the run is a
