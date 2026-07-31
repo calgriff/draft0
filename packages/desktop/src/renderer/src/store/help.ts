@@ -90,14 +90,22 @@ export const getBlankFileState = (
   tabs: Array<{ pathname: string; filename: string }>,
   defaultEncoding: string = defaultFileStateWithoutId.encoding.encoding,
   lineEnding: string = defaultFileStateWithoutId.lineEnding,
-  markdown: string | null = defaultFileStateWithoutId.markdown
+  markdown: string | null = defaultFileStateWithoutId.markdown,
+  /**
+   * Extension for the untitled document, without the dot. Carried on the
+   * filename because an unsaved tab has no pathname, and the file type is what
+   * decides which editor and preview the tab gets — a new screenplay has to
+   * behave like one before it is ever saved.
+   */
+  extension: string = ''
 ): IFileState => {
   const fileState = deepClone(defaultFileStateWithoutId) as Omit<IFileState, 'id'>
   const defaultFilenamePrefix = defaultFileStateWithoutId.filename.split('-')[0]
   let untitleId = Math.max(
     ...tabs.map((f) => {
       if (f.pathname === '') {
-        return +f.filename.split('-')[1]
+        // `Untitled-3.fountain` numbers the same sequence as `Untitled-3`.
+        return parseInt(f.filename.split('-')[1], 10) || 0
       } else {
         return 0
       }
@@ -117,7 +125,7 @@ export const getBlankFileState = (
     lineEnding,
     adjustLineEndingOnSave: lineEnding.toLowerCase() === 'crlf',
     id,
-    filename: `${defaultFilenamePrefix}-${++untitleId}`,
+    filename: `${defaultFilenamePrefix}-${++untitleId}${extension ? `.${extension}` : ''}`,
     markdown,
     // The freshly-loaded document IS its on-disk/clean baseline. The engine
     // clears its undo history on `setContent`, so the baseline undo-stack depth

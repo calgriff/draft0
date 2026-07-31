@@ -13,8 +13,12 @@ export const useFountainTab = (): { isFountainTab: ComputedRef<boolean> } => {
   const { currentFile } = storeToRefs(useEditorStore())
 
   const isFountainTab = computed(() => {
-    const pathname = currentFile.value?.pathname
-    return !!pathname && window.fileUtils.isFountainFile(pathname)
+    const file = currentFile.value
+    if (!file) return false
+    // An unsaved screenplay has no pathname, so fall back to the filename —
+    // `New Screenplay` names the tab `Untitled-N.fountain` for exactly this.
+    const name = file.pathname || file.filename || ''
+    return window.fileUtils.isFountainFile(name)
   })
 
   return { isFountainTab }

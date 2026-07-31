@@ -21,6 +21,13 @@ export default function(
       }
     },
     {
+      label: t('menu.file.newScreenplay'),
+      accelerator: keybindings.getAccelerator('file.new-screenplay') ?? undefined,
+      click(_menuItem, browserWindow) {
+        actions.newScreenplayTab(browserWindow as BrowserWindow | undefined)
+      }
+    },
+    {
       label: t('menu.file.newWindow'),
       accelerator: keybindings.getAccelerator('file.new-window') ?? undefined,
       click() {

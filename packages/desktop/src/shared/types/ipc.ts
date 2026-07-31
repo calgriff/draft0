@@ -245,7 +245,9 @@ export interface IpcMainEventChannels {
   'mt::load-state': [state: BufferedStateType]
   'mt::menu::click': [menuId: string]
   'mt::menu::closed': []
-  'mt::new-untitled-tab': [selected?: boolean, markdown?: string]
+  /** `extension` (without the dot) names the untitled tab `Untitled-N.<ext>`,
+   *  which is what makes a new screenplay behave as one before it is saved. */
+  'mt::new-untitled-tab': [selected?: boolean, markdown?: string, extension?: string]
   'mt::open-directory': [directoryPath: string]
   'mt::open-new-tab': [
     markdownDocument: MarkdownDocument | null,

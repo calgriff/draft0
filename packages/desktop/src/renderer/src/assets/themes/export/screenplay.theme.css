@@ -110,15 +110,22 @@
 }
 
 .fountain-script .title-page {
-  min-height: 8in;
+  display: flex;
+  flex-direction: column;
+  min-height: 8.5in;
   margin-bottom: 24pt;
   text-align: center;
   break-after: page;
   page-break-after: always;
 }
 
-.fountain-script .title-page-title {
+/* Title block sits around the upper third; the metadata block is pushed to the
+   foot of the page by the flex gap between them. */
+.fountain-script .title-page-main {
   margin-top: 3in;
+}
+
+.fountain-script .title-page-title {
   font-weight: bold;
   text-transform: uppercase;
   text-decoration: underline;
@@ -135,12 +142,12 @@
 }
 
 .fountain-script .title-page-meta {
-  margin: 0;
+  margin-top: auto;
   text-align: left;
 }
 
-.fountain-script .title-page-meta:first-of-type {
-  margin-top: 2in;
+.fountain-script .title-page-meta p {
+  margin: 0;
 }
 
 @media print {

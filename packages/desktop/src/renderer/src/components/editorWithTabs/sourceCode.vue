@@ -2,11 +2,13 @@
   <div
     ref="sourceCodeContainer"
     class="source-code"
+    :class="{ screenplay: isFountainTab }"
+    :style="isFountainTab ? screenplayTypography : undefined"
   />
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useEditorStore } from '@/store/editor'
 import { usePreferencesStore } from '@/store/preferences'
 import { findMarkdownHeadingLine, scrollSourceEditorToLine } from '@/util/sourceModeToc'
@@ -15,7 +17,8 @@ import codeMirror, { setCursorAtFirstLine, setTextDirection } from '../../codeMi
 import { wordCount as getWordCount } from '@muyajs/core'
 import { adjustCursor } from '../../util'
 import bus from '../../bus'
-import { oneDarkThemes, railscastsThemes } from '@/config'
+import { oneDarkThemes, railscastsThemes, DEFAULT_EDITOR_FONT_FAMILY } from '@/config'
+import { useFountainTab } from '@/composables/useFountainTab'
 
 // CodeMirror 5 ships no first-party types; the wrapper in src/renderer/src/
 // codeMirror/index.ts also keeps the surface intentionally loose.
@@ -43,24 +46,31 @@ const commitTimer = ref<ReturnType<typeof setTimeout> | null>(null)
 const viewDestroyed = ref(false)
 const tabId = ref<string | null>(null)
 
-const { theme, sourceCode } = storeToRefs(preferencesStore)
+const { theme, sourceCode, editorFontFamily, fontSize, lineHeight } =
+  storeToRefs(preferencesStore)
 const { currentFile: currentTab } = storeToRefs(editorStore)
+const { isFountainTab } = useFountainTab()
+
+// A screenplay is prose, so it reads in the editor font rather than the code
+// font CodeMirror would otherwise inherit. Applied inline because the editor
+// font is a preference, not a CSS custom property.
+const screenplayTypography = computed(() => ({
+  fontFamily: `${editorFontFamily.value || 'Open Sans'}, ${DEFAULT_EDITOR_FONT_FAMILY}`,
+  fontSize: `${fontSize.value}px`,
+  lineHeight: String(lineHeight.value)
+}))
 
 // `markdown-math` wraps the standard Markdown mode and delegates `$...$` and
 // `$$...$$` spans to stex so subscript underscores in math do not flip the
 // outer mode into emphasis. See src/renderer/src/codeMirror/markdownMathMode.ts.
-const modeForFile = (pathname?: string | null): string =>
-  pathname && window.fileUtils.isFountainFile(pathname) ? 'fountain' : 'markdown-math'
+const currentMode = (): string => (isFountainTab.value ? 'fountain' : 'markdown-math')
 
 // The source view is reused across tabs, so the mode has to follow the file.
-watch(
-  () => currentTab.value?.pathname,
-  (pathname) => {
-    if (editor.value) {
-      editor.value.setOption('mode', modeForFile(pathname))
-    }
+watch(isFountainTab, () => {
+  if (editor.value) {
+    editor.value.setOption('mode', currentMode())
   }
-)
+})
 
 const isValidMuyaIndexCursor = (cursor: unknown): cursor is MuyaIndexCursorLike => {
   const c = cursor as MuyaIndexCursorLike | null | undefined
@@ -388,7 +398,7 @@ onMounted(() => {
   // See https://github.com/codemirror/codemirror5/issues/6886 - hence, we need to use a local variable first.
   const codeMirrorInstance = codeMirror(container, codeMirrorConfig)
 
-  codeMirrorInstance.setOption('mode', modeForFile(currentTab.value?.pathname))
+  codeMirrorInstance.setOption('mode', currentMode())
 
   codeMirrorInstance.on('contextmenu', (_cm: CMInstance, event: Event) => {
     event.preventDefault()
@@ -450,5 +460,24 @@ onBeforeUnmount(() => {
 .source-code .CodeMirror-activeline-background,
 .source-code .CodeMirror-activeline-gutter {
   background: var(--floatHoverColor);
+}
+
+/* Screenplay source reads as prose, so it inherits the editor typography set
+   on the container rather than the code font `addCommonStyle` puts on
+   `.CodeMirror`, and sits on the same measure as the WYSIWYG editor. */
+.source-code.screenplay .CodeMirror {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  margin: 20px auto;
+}
+
+.source-code.screenplay .CodeMirror-gutters {
+  border: none;
+  background: transparent;
+}
+
+.source-code.screenplay .CodeMirror-linenumber {
+  color: var(--editorColor30);
 }
 </style>

@@ -50,19 +50,26 @@ const renderTitlePage = (title: Record<string, string>): string => {
     title[key] ? `<p class="${className}">${renderInline(title[key])}</p>` : ''
 
   // The remaining keys (contact, draft date, notes…) sit bottom-left, which is
-  // where a title page conventionally puts them.
+  // where a title page conventionally puts them. They live in their own
+  // container: positioning them as a group is what pushes them down the page,
+  // and a `:first-of-type` rule cannot do it because every child here is a
+  // `<p>` — it would match the title instead.
   const known = new Set(['title', 'credit', 'author', 'authors', 'source'])
-  const rest = Object.keys(title)
-    .filter((key) => !known.has(key))
-    .map((key) => `<p class="title-page-meta">${renderInline(title[key])}</p>`)
-    .join('\n')
+  const restKeys = Object.keys(title).filter((key) => !known.has(key))
+  const rest = restKeys.length
+    ? `<div class="title-page-meta">
+${restKeys.map((key) => `<p>${renderInline(title[key])}</p>`).join('\n')}
+</div>`
+    : ''
 
   return `<section class="title-page">
+<div class="title-page-main">
 ${line('title', 'title-page-title')}
 ${line('credit', 'title-page-credit')}
 ${line('author', 'title-page-author')}
 ${line('authors', 'title-page-author')}
 ${line('source', 'title-page-source')}
+</div>
 ${rest}
 </section>`
 }

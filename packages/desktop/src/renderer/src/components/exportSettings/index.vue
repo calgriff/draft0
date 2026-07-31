@@ -13,7 +13,11 @@
           :label="t('exportSettings.info.label')"
           name="info"
         >
-          <span class="text">{{ t('exportSettings.info.description') }}</span>
+          <span class="text">{{
+            isFountainTab
+              ? t('exportSettings.info.screenplayDescription')
+              : t('exportSettings.info.description')
+          }}</span>
         </el-tab-pane>
         <el-tab-pane
           :label="t('exportSettings.page.label')"
@@ -144,17 +148,20 @@
             />
           </div>
           <bool
+            v-if="!isFountainTab"
             :description="t('exportSettings.autoNumberingHeadings')"
             :bool="autoNumberingHeadings"
             :on-change="(value: unknown) => onSelectChange('autoNumberingHeadings', value)"
           />
           <bool
+            v-if="!isFountainTab"
             :description="t('exportSettings.showFrontMatter')"
             :bool="showFrontMatter"
             :on-change="(value: unknown) => onSelectChange('showFrontMatter', value)"
           />
         </el-tab-pane>
         <el-tab-pane
+          v-if="!isFountainTab"
           :label="t('exportSettings.theme.label')"
           name="theme"
         >
@@ -265,6 +272,7 @@
         </el-tab-pane>
 
         <el-tab-pane
+          v-if="!isFountainTab"
           :label="t('exportSettings.toc.label')"
           name="toc"
         >
@@ -305,8 +313,12 @@ import Range from '@/prefComponents/common/range/index.vue'
 import TextBox from '@/prefComponents/common/textBox/index.vue'
 import { getPageSizeList, getHeaderFooterTypes, getExportThemeList } from './exportOptions'
 import { useI18n } from 'vue-i18n'
+import { useFountainTab } from '@/composables/useFountainTab'
 
 const { t } = useI18n()
+// A screenplay's layout comes from the Fountain format itself, so the
+// markdown-only panes (document theme, TOC, front matter) do not apply.
+const { isFountainTab } = useFountainTab()
 
 const exportType = ref('')
 const isPrintable = ref(true)

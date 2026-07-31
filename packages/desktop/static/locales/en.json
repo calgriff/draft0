@@ -8,6 +8,7 @@
     "file": {
       "file": "File",
       "newTab": "New Tab",
+      "newScreenplay": "New Screenplay",
       "newWindow": "New Window",
       "openFile": "Open File...",
       "openFolder": "Open Folder...",
@@ -264,7 +265,8 @@
     "title": "Export Options",
     "info": {
       "label": "Info",
-      "description": "Please customize the page appearance and click on \"export\" to continue."
+      "description": "Please customize the page appearance and click on \"export\" to continue.",
+      "screenplayDescription": "This screenplay will be exported in standard Fountain layout — 12pt Courier, industry margins, title page first. Set the page options and click \"export\" to continue."
     },
     "page": {
       "label": "Page",

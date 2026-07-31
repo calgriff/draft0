@@ -61,11 +61,13 @@ const html = computed(() => fountainToHtml(props.markdown ?? ''))
   border-bottom: 1px solid var(--floatBorderColor);
 }
 
-.fountain-preview .fountain-script .title-page-title {
+/* The preview is a continuous scroll, not paginated, so the title page is
+   sized to its content instead of holding a full page open. */
+.fountain-preview .fountain-script .title-page-main {
   margin-top: 0;
 }
 
-.fountain-preview .fountain-script .title-page-meta:first-of-type {
+.fountain-preview .fountain-script .title-page-meta {
   margin-top: 24pt;
 }
 

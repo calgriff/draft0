@@ -26,6 +26,7 @@ const COMMANDS = Object.freeze({
   FILE_MOVE_FILE: 'file.move-file',
   FILE_NEW_FILE: 'file.new-window',
   FILE_NEW_TAB: 'file.new-tab',
+  FILE_NEW_SCREENPLAY: 'file.new-screenplay',
   FILE_OPEN_FILE: 'file.open-file',
   FILE_OPEN_FOLDER: 'file.open-folder',
   FILE_PREFERENCES: 'file.preferences',

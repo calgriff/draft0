@@ -943,9 +943,9 @@ export const useEditorStore = defineStore('editor', {
 
       window.electron.ipcRenderer.on(
         'mt::new-untitled-tab',
-        (_, selected = true, markdown = '') => {
+        (_, selected = true, markdown = '', extension = '') => {
           // Create a blank tab
-          this.NEW_UNTITLED_TAB({ markdown, selected })
+          this.NEW_UNTITLED_TAB({ markdown, selected, extension })
         }
       )
       bus.on('mt::new-untitled-tab', (payload) => {
@@ -1241,8 +1241,9 @@ export const useEditorStore = defineStore('editor', {
      */
     NEW_UNTITLED_TAB({
       markdown: markdownString,
-      selected
-    }: { markdown?: string; selected?: boolean }): void {
+      selected,
+      extension
+    }: { markdown?: string; selected?: boolean; extension?: string }): void {
       if (selected == null) {
         selected = true
       }
@@ -1255,7 +1256,8 @@ export const useEditorStore = defineStore('editor', {
         this.tabs,
         defaultEncoding,
         endOfLine,
-        markdownString ?? null
+        markdownString ?? null,
+        extension
       )
 
       if (selected) {

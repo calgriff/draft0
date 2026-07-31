@@ -185,8 +185,14 @@ const handleResponseForSave = async(
   let filePath = pathname
 
   if (!filePath) {
+    // Keep the tab's own extension when it has one, so a screenplay is offered
+    // as `.fountain` rather than `Untitled-1.fountain.md`. The recommended name
+    // is derived from the document's first heading and may itself carry an
+    // extension; strip it before re-applying the real one.
+    const extension = path.extname(filename || '') || '.md'
+    const base = recommendFilename.replace(/\.[^./\\]+$/, '') || 'Untitled'
     const { filePath: dialogPath, canceled } = await dialog.showSaveDialog(win, {
-      defaultPath: path.join(defaultPath || getPath('documents'), `${recommendFilename}.md`)
+      defaultPath: path.join(defaultPath || getPath('documents'), `${base}${extension}`)
     })
 
     if (dialogPath && !canceled) {
@@ -780,6 +786,13 @@ export const newBlankTab = (win: Win): void => {
   }
 }
 
+export const newScreenplayTab = (win: Win): void => {
+  if (win && win.webContents) {
+    win.webContents.send('mt::new-untitled-tab', true, '', 'fountain')
+    showTabBar(win)
+  }
+}
+
 export const newEditorWindow = (): void => {
   ipcMain.emit('app-create-editor-window')
 }
@@ -846,6 +859,7 @@ export const loadFileCommands = (commandManager: CommandManager): void => {
   commandManager.add(COMMANDS.FILE_MOVE_FILE, moveTo)
   commandManager.add(COMMANDS.FILE_NEW_FILE, newEditorWindow)
   commandManager.add(COMMANDS.FILE_NEW_TAB, newBlankTab)
+  commandManager.add(COMMANDS.FILE_NEW_SCREENPLAY, newScreenplayTab)
   commandManager.add(COMMANDS.FILE_OPEN_FILE, openFile)
   commandManager.add(COMMANDS.FILE_OPEN_FOLDER, openFolder)
   commandManager.add(COMMANDS.FILE_PREFERENCES, userSetting)
