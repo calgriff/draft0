@@ -611,6 +611,12 @@ const commands: CommandDescriptor[] = [
       bus.emit('view:toggle-layout-entry', 'showTabBar')
     }
   },
+  {
+    id: 'view.toggle-screenplay-preview',
+    execute: async() => {
+      bus.emit('view:toggle-layout-entry', 'showScreenplayPreview')
+    }
+  },
 
   {
     id: 'view.text-direction',

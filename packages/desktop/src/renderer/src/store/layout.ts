@@ -173,11 +173,18 @@ export const useLayoutStore = defineStore('layout', () => {
     })
 
     bus.on('view:toggle-layout-entry', (entryName: unknown) => {
-      const name = entryName as 'showSideBar' | 'showTabBar'
+      const name = entryName as 'showSideBar' | 'showTabBar' | 'showScreenplayPreview'
       TOGGLE_LAYOUT_ENTRY(name)
+      // Report the entry that actually changed; a ternary over two of the three
+      // would send another entry's value under this one's name.
+      const current = {
+        showSideBar: showSideBar.value,
+        showTabBar: showTabBar.value,
+        showScreenplayPreview: showScreenplayPreview.value
+      }
       const { windowId } = window.marktext?.env ?? {}
       window.electron.ipcRenderer.send('mt::view-layout-changed', Number(windowId), {
-        [name]: name === 'showSideBar' ? showSideBar.value : showTabBar.value
+        [name]: current[name]
       })
     })
   }

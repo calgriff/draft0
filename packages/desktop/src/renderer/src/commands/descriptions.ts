@@ -162,6 +162,7 @@ const COMMAND_KEY_MAP: Record<string, string> = {
   // UI toggles
   'view.toggle-sidebar': 'commands.view.toggleSidebar',
   'view.toggle-tabbar': 'commands.view.toggleTabbar',
+  'view.toggle-screenplay-preview': 'commands.view.toggleScreenplayPreview',
   'view.toggle-toc': 'commands.view.toggleToc',
 
   // Edit modes

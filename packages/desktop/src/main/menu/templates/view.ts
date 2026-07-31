@@ -71,6 +71,7 @@ export default function(keybindings: Keybindings): MenuItemConstructorOptions {
     {
       label: t('menu.view.toggleScreenplayPreview'),
       id: 'screenplayPreviewMenuItem',
+      accelerator: keybindings.getAccelerator('view.toggle-screenplay-preview') ?? undefined,
       type: 'checkbox',
       checked: true,
       click(_item, focusedWindow) {

@@ -868,6 +868,7 @@
       "toggleSidebar": "Toggle Sidebar",
       "toggleToc": "Toggle Table of Contents",
       "toggleTabbar": "Toggle Tab Bar",
+      "toggleScreenplayPreview": "Toggle Screenplay Preview",
       "toggleDevTools": "Toggle Developer Tools",
       "devReload": "Developer Reload",
       "reloadImages": "Reload Images",

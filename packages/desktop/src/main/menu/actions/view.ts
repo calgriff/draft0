@@ -90,6 +90,7 @@ export const loadViewCommands = (commandManager: CommandManager): void => {
   commandManager.add(COMMANDS.VIEW_SOURCE_CODE_MODE, toggleSourceCodeMode)
   commandManager.add(COMMANDS.VIEW_TOGGLE_SIDEBAR, toggleSidebar)
   commandManager.add(COMMANDS.VIEW_TOGGLE_TABBAR, toggleTabBar)
+  commandManager.add(COMMANDS.VIEW_TOGGLE_SCREENPLAY_PREVIEW, toggleScreenplayPreview)
   commandManager.add(COMMANDS.VIEW_TOGGLE_TOC, showTableOfContents)
   commandManager.add(COMMANDS.VIEW_TYPEWRITER_MODE, toggleTypewriterMode)
 
