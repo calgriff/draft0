@@ -24,6 +24,7 @@ import { adjustCursor } from '../../util'
 import bus from '../../bus'
 import { oneDarkThemes, railscastsThemes, DEFAULT_EDITOR_FONT_FAMILY } from '@/config'
 import { useFountainTab } from '@/composables/useFountainTab'
+import { blockRangeAt } from 'common/fountain/blocks'
 import FountainBlockMenu from './fountainBlockMenu.vue'
 
 // CodeMirror 5 ships no first-party types; the wrapper in src/renderer/src/
@@ -56,6 +57,11 @@ const { theme, sourceCode, editorFontFamily, fontSize, lineHeight } =
   storeToRefs(preferencesStore)
 const { currentFile: currentTab } = storeToRefs(editorStore)
 const { isFountainTab } = useFountainTab()
+
+// Whether this view is the one on screen. A screenplay shows it regardless of
+// the global source-code preference, so commands routed here from the menu -
+// select all, undo, redo - must not test that preference alone.
+const showingSource = computed(() => sourceCode.value || isFountainTab.value)
 
 // A screenplay is prose, so it reads in the editor font rather than the code
 // font CodeMirror would otherwise inherit. Applied inline because the editor
@@ -231,12 +237,39 @@ const handleInvalidateImageCache = () => {
   }
 }
 
+/**
+ * Select the block the caret sits in; select the whole document if that block
+ * is already selected. Mirrors the WYSIWYG editor, where Ctrl+A grows from
+ * block to document.
+ *
+ * Returns false when there is nothing to escalate from, so the caller falls
+ * back to selecting everything.
+ */
+const selectEnclosingBlock = (cm: CMInstance): boolean => {
+  const range = blockRangeAt(cm.getValue(), cm.getCursor('head').line)
+  if (!range) return false
+
+  const [start, end] = [cm.getCursor('from'), cm.getCursor('to')]
+  const alreadyWholeBlock =
+    start.line === range.from.line &&
+    start.ch === range.from.ch &&
+    end.line === range.to.line &&
+    end.ch === range.to.ch
+  if (alreadyWholeBlock) return false
+
+  cm.setSelection(range.from, range.to)
+  return true
+}
+
 const handleSelectAll = () => {
-  if (!sourceCode.value) {
+  if (!showingSource.value) {
     return
   }
 
   if (editor.value && editor.value.hasFocus()) {
+    // Screenplays escalate block -> document; markdown source keeps the plain
+    // select-all it has always had.
+    if (isFountainTab.value && selectEnclosingBlock(editor.value)) return
     editor.value.execCommand('selectAll')
   } else {
     const activeElement = document.activeElement as HTMLElement | null
@@ -251,7 +284,7 @@ const handleSelectAll = () => {
 }
 
 const handleUndo = () => {
-  if (!sourceCode.value) {
+  if (!showingSource.value) {
     return
   }
 
@@ -261,7 +294,7 @@ const handleUndo = () => {
 }
 
 const handleRedo = () => {
-  if (!sourceCode.value) {
+  if (!showingSource.value) {
     return
   }
 

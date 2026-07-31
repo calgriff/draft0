@@ -30,6 +30,36 @@ export interface BlockEdit {
 
 const SCENE_PREFIX_REG = /^(?:INT|EXT|EST|INT\.\/EXT|INT\/EXT|I\/E)[.\s]/i
 
+export interface LinePosition {
+  line: number
+  ch: number
+}
+
+export interface BlockRange {
+  from: LinePosition
+  to: LinePosition
+}
+
+/**
+ * The run of non-blank lines containing `line` — a scene heading, a paragraph
+ * of action, or a whole character/parenthetical/dialogue run, since Fountain
+ * groups those with the same blank lines that separate everything else.
+ *
+ * Returns null on a blank line, which belongs to no block.
+ */
+export const blockRangeAt = (text: string, line: number): BlockRange | null => {
+  const lines = text.replace(/\r\n?/g, '\n').split('\n')
+  if (line < 0 || line >= lines.length || !lines[line].trim()) return null
+
+  let start = line
+  while (start > 0 && lines[start - 1].trim()) start--
+
+  let end = line
+  while (end < lines.length - 1 && lines[end + 1].trim()) end++
+
+  return { from: { line: start, ch: 0 }, to: { line: end, ch: lines[end].length } }
+}
+
 /** Strip whatever element markers a line already carries, leaving its text. */
 const bareText = (line: string): string =>
   line

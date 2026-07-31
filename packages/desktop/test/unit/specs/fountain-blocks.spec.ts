@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { applyBlockType } from 'common/fountain/blocks'
+import { applyBlockType, blockRangeAt } from 'common/fountain/blocks'
 
 const lines = (text: string): string[] => text.split('\n')
 
@@ -68,6 +68,41 @@ describe('applyBlockType', () => {
   })
 
   it('is a no-op for a line index outside the document', () => {
+    const { text } = applyBlockType('Action.', 5, 'character')
+
+    expect(text).toBe('Action.')
+  })
+})
+
+describe('blockRangeAt', () => {
+  const script = ['INT. HOUSE - DAY', '', 'STEEL', '(quietly)', 'Hello.', '', 'He leaves.'].join(
+    '\n'
+  )
+
+  it('spans a whole dialogue run from anywhere inside it', () => {
+    for (const line of [2, 3, 4]) {
+      expect(blockRangeAt(script, line)).toEqual({
+        from: { line: 2, ch: 0 },
+        to: { line: 4, ch: 'Hello.'.length }
+      })
+    }
+  })
+
+  it('spans a single-line block', () => {
+    expect(blockRangeAt(script, 0)).toEqual({
+      from: { line: 0, ch: 0 },
+      to: { line: 0, ch: 'INT. HOUSE - DAY'.length }
+    })
+  })
+
+  it('returns nothing for a blank line or one outside the document', () => {
+    expect(blockRangeAt(script, 1)).toBeNull()
+    expect(blockRangeAt(script, 99)).toBeNull()
+  })
+})
+
+describe('applyBlockType bounds', () => {
+  it('leaves the document untouched for an out-of-range line', () => {
     const { text } = applyBlockType('Action.', 5, 'character')
 
     expect(text).toBe('Action.')
