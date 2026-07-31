@@ -112,23 +112,30 @@
 .fountain-script .title-page {
   display: flex;
   flex-direction: column;
-  min-height: 8.5in;
+  min-height: 9in;
   margin-bottom: 24pt;
   text-align: center;
   break-after: page;
   page-break-after: always;
 }
 
-/* Title block sits around the upper third; the metadata block is pushed to the
-   foot of the page by the flex gap between them. */
+/* Rights and disclaimers sit at the head of the page, left aligned. */
+.fountain-script .title-page-notes {
+  text-align: left;
+  font-style: italic;
+}
+
+.fountain-script .title-page-notes p {
+  margin: 0;
+}
+
+/* The title block sits about a third of the way down rather than at the top. */
 .fountain-script .title-page-main {
-  margin-top: 3in;
+  margin-top: 2.6in;
 }
 
 .fountain-script .title-page-title {
-  font-weight: bold;
   text-transform: uppercase;
-  text-decoration: underline;
 }
 
 .fountain-script .title-page-credit,
@@ -138,15 +145,29 @@
 }
 
 .fountain-script .title-page-credit {
-  margin-top: 12pt;
+  margin-top: 24pt;
 }
 
-.fountain-script .title-page-meta {
+.fountain-script .title-page-author {
+  margin-top: 24pt;
+}
+
+/* Date, draft number and copyright, centred under the title block. */
+.fountain-script .title-page-details {
+  margin-top: 48pt;
+}
+
+.fountain-script .title-page-details p {
+  margin: 0 0 12pt;
+}
+
+/* Contact details are pushed to the foot of the page by the flex gap. */
+.fountain-script .title-page-contact {
   margin-top: auto;
   text-align: left;
 }
 
-.fountain-script .title-page-meta p {
+.fountain-script .title-page-contact p {
   margin: 0;
 }
 

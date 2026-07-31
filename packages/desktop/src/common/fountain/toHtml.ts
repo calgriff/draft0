@@ -49,20 +49,28 @@ const renderTitlePage = (title: Record<string, string>): string => {
   const line = (key: string, className: string): string =>
     title[key] ? `<p class="${className}">${renderInline(title[key])}</p>` : ''
 
-  // The remaining keys (contact, draft date, notes…) sit bottom-left, which is
-  // where a title page conventionally puts them. They live in their own
-  // container: positioning them as a group is what pushes them down the page,
-  // and a `:first-of-type` rule cannot do it because every child here is a
-  // `<p>` — it would match the title instead.
-  const known = new Set(['title', 'credit', 'author', 'authors', 'source'])
-  const restKeys = Object.keys(title).filter((key) => !known.has(key))
-  const rest = restKeys.length
-    ? `<div class="title-page-meta">
-${restKeys.map((key) => `<p>${renderInline(title[key])}</p>`).join('\n')}
+  // A title page has four zones, and which one a key belongs to is a
+  // convention of the format rather than anything in the syntax:
+  //   notes                       top-left, italic (rights, disclaimers)
+  //   title/credit/author/source  centred, upper-middle
+  //   date/draft/revision/©       centred, below the title block
+  //   contact + anything else     bottom-left
+  const MAIN_KEYS = ['title', 'credit', 'author', 'authors', 'source']
+  const DETAIL_KEYS = ['date', 'draft date', 'revision', 'copyright']
+
+  const zone = (className: string, keys: string[]): string => {
+    const present = keys.filter((key) => title[key])
+    if (!present.length) return ''
+    return `<div class="${className}">
+${present.map((key) => `<p>${renderInline(title[key])}</p>`).join('\n')}
 </div>`
-    : ''
+  }
+
+  const placed = new Set([...MAIN_KEYS, ...DETAIL_KEYS, 'notes'])
+  const contactKeys = Object.keys(title).filter((key) => !placed.has(key))
 
   return `<section class="title-page">
+${zone('title-page-notes', ['notes'])}
 <div class="title-page-main">
 ${line('title', 'title-page-title')}
 ${line('credit', 'title-page-credit')}
@@ -70,7 +78,8 @@ ${line('author', 'title-page-author')}
 ${line('authors', 'title-page-author')}
 ${line('source', 'title-page-source')}
 </div>
-${rest}
+${zone('title-page-details', DETAIL_KEYS)}
+${zone('title-page-contact', contactKeys)}
 </section>`
 }
 

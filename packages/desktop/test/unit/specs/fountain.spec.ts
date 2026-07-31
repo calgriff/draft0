@@ -117,6 +117,35 @@ describe('fountainToHtml', () => {
     expect(html).toContain('&lt;script&gt;')
   })
 
+  it('places each title-page key in its conventional zone', () => {
+    const html = fountainToHtml(
+      [
+        'Title: Big Fish',
+        'Credit: Written by',
+        'Author: John August',
+        'Notes: All rights reserved.',
+        'Draft date: 1 May 2003',
+        'Copyright: (c) 2003',
+        'Contact: hello@example.com',
+        '',
+        'INT. HOUSE - DAY'
+      ].join('\n')
+    )
+
+    // The zone a value belongs to is the last zone opened before it.
+    const zoneOf = (needle: string): string => {
+      const index = html.indexOf(needle)
+      if (index < 0) return 'absent'
+      const opened = [...html.slice(0, index).matchAll(/<div class="(title-page-[a-z]+)">/g)]
+      return opened.length ? opened[opened.length - 1][1] : 'none'
+    }
+
+    expect(zoneOf('All rights reserved')).toBe('title-page-notes')
+    expect(zoneOf('1 May 2003')).toBe('title-page-details')
+    expect(zoneOf('hello@example.com')).toBe('title-page-contact')
+    expect(html).toContain('class="title-page-title"')
+  })
+
   it('emits the class names the screenplay stylesheet targets', () => {
     const html = fountainToHtml(['INT. ROOM - DAY', '', 'STEEL', 'Hello.'].join('\n'))
 

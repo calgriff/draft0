@@ -62,12 +62,17 @@ const html = computed(() => fountainToHtml(props.markdown ?? ''))
 }
 
 /* The preview is a continuous scroll, not paginated, so the title page is
-   sized to its content instead of holding a full page open. */
+   sized to its content instead of holding a full page open. The zones keep
+   their order and alignment, just not the page-height gaps between them. */
 .fountain-preview .fountain-script .title-page-main {
-  margin-top: 0;
+  margin-top: 24pt;
 }
 
-.fountain-preview .fountain-script .title-page-meta {
+.fountain-preview .fountain-script .title-page-details {
+  margin-top: 24pt;
+}
+
+.fountain-preview .fountain-script .title-page-contact {
   margin-top: 24pt;
 }
 
