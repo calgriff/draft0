@@ -231,6 +231,29 @@ const handleFileLoaded = (payload: unknown) => {
   editor.value?.focus()
 }
 
+/**
+ * CodeMirror caches character metrics and only re-measures when told to. If its
+ * container changes width — toggling the screenplay preview, the sidebar, the
+ * window — it keeps placing the caret from the old geometry, which is most
+ * obvious on empty lines, where there is no text to anchor to.
+ */
+let resizeObserver: ResizeObserver | null = null
+let lastSize = { width: 0, height: 0 }
+
+const observeResize = (container: HTMLElement) => {
+  resizeObserver = new ResizeObserver((entries) => {
+    const box = entries[0]?.contentRect
+    if (!box) return
+    // Only on a real change: `refresh()` itself can trigger the observer.
+    if (Math.abs(box.width - lastSize.width) < 1 && Math.abs(box.height - lastSize.height) < 1) {
+      return
+    }
+    lastSize = { width: box.width, height: box.height }
+    editor.value?.refresh()
+  })
+  resizeObserver.observe(container)
+}
+
 const handleInvalidateImageCache = () => {
   if (editor.value) {
     editor.value.invalidateImageCache()
@@ -467,11 +490,18 @@ onMounted(() => {
   editor.value = codeMirrorInstance
   tabId.value = id
 
+  if (container) {
+    lastSize = { width: container.clientWidth, height: container.clientHeight }
+    observeResize(container)
+  }
+
   listenChange()
 })
 
 onBeforeUnmount(() => {
   viewDestroyed.value = true
+  resizeObserver?.disconnect()
+  resizeObserver = null
   if (commitTimer.value) clearTimeout(commitTimer.value)
 
   bus.off('file-loaded', handleFileLoaded)
